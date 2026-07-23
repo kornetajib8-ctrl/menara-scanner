@@ -318,7 +318,7 @@ tailwind.config = {
       </div>
       <span class="font-medium text-[11px] text-on-surface-variant uppercase tracking-tight">Inventory</span>
     </a>
-    <a class="flex flex-col items-center justify-center gap-1" href="#" onclick="event.preventDefault(); navigateTo('dashboard')">
+    <a id="nav-dashboard-tab" class="flex flex-col items-center justify-center gap-1" href="#" onclick="event.preventDefault(); navigateTo('dashboard')">
       <div class="w-14 h-8 flex items-center justify-center text-on-surface-variant rounded-full transition-colors">
         <span class="material-symbols-outlined text-[22px]">grid_view</span>
       </div>
@@ -331,36 +331,44 @@ tailwind.config = {
 <!-- PAGE: ADMIN (Dashboard + Master Data) -->
 <!-- ============================================ -->
 <div id="page-admin" class="page min-h-screen">
-  <!-- Sidebar -->
-  <aside class="fixed left-0 top-0 h-full w-64 bg-white border-r border-border-subtle z-40 hidden md:flex flex-col py-6">
-    <div class="px-6 mb-10 flex items-center gap-3">
-      <div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
-        <span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings:'FILL' 1;">tower</span>
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity duration-300 md:hidden" onclick="toggleMobileSidebar(false)"></div>
+
+  <!-- Sidebar Drawer -->
+  <aside id="sidebar-drawer" class="fixed left-0 top-0 h-full w-64 bg-white border-r border-border-subtle z-50 flex flex-col py-6 transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
+    <div class="px-6 mb-8 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/20">
+          <span class="material-symbols-outlined text-white text-[22px]" style="font-variation-settings:'FILL' 1;">tower</span>
+        </div>
+        <h1 class="text-[15px] font-bold text-on-surface tracking-tight leading-tight">MENARA ONLINE<br/><span class="text-[11px] font-semibold text-primary uppercase tracking-[0.15em]">SYSTEM</span></h1>
       </div>
-      <h1 class="text-[16px] font-bold text-on-surface tracking-tight leading-tight">MENARA ONLINE<br/><span class="text-[12px] font-medium text-primary uppercase tracking-[0.15em]">SYSTEM</span></h1>
+      <button class="md:hidden p-1.5 rounded-lg text-secondary hover:bg-surface-container-low" onclick="toggleMobileSidebar(false)">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
     </div>
     <nav class="flex-1 px-4 space-y-1">
-      <p class="px-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Main Menu</p>
-      <a class="sidebar-link flex items-center gap-3 px-4 py-3 transition-all cursor-pointer" data-view="dashboard" onclick="switchAdminView('dashboard')">
+      <p class="px-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Main Menu</p>
+      <a id="sidebar-dashboard-link" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer" data-view="dashboard" onclick="toggleMobileSidebar(false); switchAdminView('dashboard')">
         <span class="material-symbols-outlined">grid_view</span>
         <span class="font-semibold text-[14px]">Dashboard</span>
       </a>
-      <a class="sidebar-link flex items-center gap-3 px-4 py-3 transition-all cursor-pointer" data-view="master-data" onclick="switchAdminView('master-data')">
+      <a class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer" data-view="master-data" onclick="toggleMobileSidebar(false); switchAdminView('master-data')">
         <span class="material-symbols-outlined">inventory_2</span>
         <span class="font-semibold text-[14px]">Master Data</span>
       </a>
-      <a class="sidebar-link flex items-center gap-3 px-4 py-3 transition-all cursor-pointer" onclick="navigateTo('scanner')">
+      <a class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer text-on-surface-variant hover:bg-surface-container-low" onclick="toggleMobileSidebar(false); navigateTo('scanner')">
         <span class="material-symbols-outlined">barcode_scanner</span>
         <span class="font-semibold text-[14px]">Scanner</span>
       </a>
     </nav>
-    <div class="px-4 mt-auto space-y-1 pt-6 border-t border-border-subtle">
-      <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant/50 transition-all cursor-pointer" onclick="handleLogout()">
+    <div class="px-4 mt-auto space-y-1 pt-4 border-t border-border-subtle">
+      <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-xl transition-all cursor-pointer" onclick="toggleMobileSidebar(false); handleLogout()">
         <span class="material-symbols-outlined">logout</span>
-        <span class="font-medium text-[14px]">Logout</span>
+        <span class="font-semibold text-[14px]">Logout</span>
       </a>
-      <div class="p-4 mt-4 bg-surface-container-low rounded-xl flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs" id="admin-avatar">A</div>
+      <div class="p-3.5 mt-3 bg-surface-container-low rounded-xl flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs shrink-0" id="admin-avatar">A</div>
         <div class="flex flex-col min-w-0">
           <span class="text-on-surface text-[13px] font-bold truncate" id="admin-sidebar-name">Admin</span>
           <span class="text-on-surface-variant text-[11px]" id="admin-sidebar-role">Admin Master</span>
@@ -370,31 +378,27 @@ tailwind.config = {
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 md:ml-64 min-h-screen flex flex-col">
+  <main class="flex-1 md:ml-64 min-h-screen flex flex-col min-w-0">
     <!-- Top Bar -->
-    <header class="sticky top-0 z-30 bg-white border-b border-border-subtle h-16">
-      <div class="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-full">
-        <div class="flex items-center gap-4">
-          <button class="md:hidden text-primary" onclick="document.querySelector('#page-admin aside').classList.toggle('hidden')">
-            <span class="material-symbols-outlined">menu</span>
+    <header class="sticky top-0 z-30 bg-white border-b border-border-subtle h-16 shrink-0">
+      <div class="flex justify-between items-center w-full px-4 sm:px-6 max-w-container-max mx-auto h-full gap-2">
+        <div class="flex items-center gap-3 min-w-0">
+          <button class="md:hidden p-2 text-on-surface hover:bg-surface-container-low rounded-xl transition-colors shrink-0" onclick="toggleMobileSidebar(true)">
+            <span class="material-symbols-outlined text-2xl">menu</span>
           </button>
-          <h2 class="font-headline-lg text-on-surface text-lg font-bold" id="admin-page-title">Dashboard Rekapitulasi</h2>
+          <h2 class="font-headline-lg text-on-surface text-base sm:text-lg font-bold truncate" id="admin-page-title">Dashboard Rekapitulasi</h2>
         </div>
-        <div class="flex items-center gap-3">
-          <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border-subtle hover:bg-surface-container-low rounded-xl text-xs font-bold transition-all text-on-surface" onclick="openModal('modal-add-store')">
-            <span class="material-symbols-outlined text-sm">store</span>
-            <span>Tambah Toko</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border-subtle hover:bg-surface-container-low rounded-xl text-xs font-bold transition-all text-on-surface shadow-sm" onclick="openModal('modal-add-store')">
+            <span class="material-symbols-outlined text-base">store</span>
+            <span class="hidden sm:inline">Tambah Toko</span>
           </button>
           <button class="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-xs font-bold transition-all" onclick="navigateTo('scanner')">
-            <span class="material-symbols-outlined text-sm">barcode_scanner</span>
-            <span>Buka Scanner</span>
+            <span class="material-symbols-outlined text-base">barcode_scanner</span>
+            <span class="hidden sm:inline">Buka Scanner</span>
           </button>
-          <div class="relative hidden sm:block">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-lg">search</span>
-            <input class="pl-10 pr-4 py-2 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all w-64" placeholder="Cari No. Resi..." type="text" id="admin-search" onkeyup="handleAdminSearch(this.value)"/>
-          </div>
-          <button class="flex items-center gap-2 p-1.5 hover:bg-surface-container-low rounded-full transition-colors" onclick="handleLogout()" title="Logout">
-            <span class="material-symbols-outlined text-on-surface-variant">logout</span>
+          <button class="flex items-center p-2 hover:bg-surface-container-low rounded-xl transition-colors text-on-surface-variant" onclick="handleLogout()" title="Logout">
+            <span class="material-symbols-outlined text-lg">logout</span>
           </button>
         </div>
       </div>
@@ -403,9 +407,9 @@ tailwind.config = {
     <!-- ==================== -->
     <!-- VIEW: Dashboard -->
     <!-- ==================== -->
-    <div id="view-dashboard" class="admin-view active p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
+    <div id="view-dashboard" class="admin-view active p-4 sm:p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
       <!-- KPI Cards -->
-      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div class="bg-white p-5 rounded-xl shadow-soft border border-border-subtle hover:border-primary/30 transition-all">
           <div class="flex justify-between items-start mb-3">
             <div class="bg-primary/10 p-2.5 rounded-lg"><span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings:'FILL' 1;">package_2</span></div>
@@ -518,29 +522,29 @@ tailwind.config = {
     <!-- ==================== -->
     <!-- VIEW: Master Data -->
     <!-- ==================== -->
-    <div id="view-master-data" class="admin-view p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
+    <div id="view-master-data" class="admin-view p-4 sm:p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
       <!-- Header Actions -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 gap-4">
         <div>
           <nav class="flex text-xs text-secondary mb-2 gap-2">
             <span class="hover:text-primary cursor-pointer" onclick="switchAdminView('dashboard')">Dashboard</span>
             <span>/</span>
             <span class="text-on-surface font-semibold">Master Data</span>
           </nav>
-          <p class="text-secondary font-body-sm text-body-sm">Manage orders and logistics data in real-time.</p>
+          <p class="text-secondary font-body-sm text-xs sm:text-sm">Manage orders and logistics data in real-time.</p>
         </div>
-        <div class="flex items-center gap-3">
-          <button class="flex items-center px-4 py-2.5 bg-white border border-border-subtle text-on-surface font-semibold text-sm rounded-xl hover:bg-surface-container-low transition-colors shadow-sm" onclick="openModal('modal-add-store')">
-            <span class="material-symbols-outlined mr-2 text-lg">store</span>Tambah Toko
+        <div class="flex items-center gap-2.5">
+          <button class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-white border border-border-subtle text-on-surface font-semibold text-xs sm:text-sm rounded-xl hover:bg-surface-container-low transition-colors shadow-sm" onclick="openModal('modal-add-store')">
+            <span class="material-symbols-outlined mr-1.5 text-base sm:text-lg">store</span>Tambah Toko
           </button>
-          <button class="flex items-center px-6 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-primary/20" onclick="openModal('modal-upload')">
-            <span class="material-symbols-outlined mr-2 text-lg">upload_file</span>Upload Excel Shopee
+          <button class="flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-6 py-2.5 bg-primary text-white font-semibold text-xs sm:text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-primary/20" onclick="openModal('modal-upload')">
+            <span class="material-symbols-outlined mr-1.5 text-base sm:text-lg">upload_file</span>Upload Excel
           </button>
         </div>
       </div>
 
       <!-- Stat Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between">
           <div class="flex justify-between items-start mb-4">
             <div class="p-2.5 bg-primary/10 rounded-xl"><span class="material-symbols-outlined text-primary">pending_actions</span></div>
@@ -709,14 +713,35 @@ const APP = {
 };
 
 // ============================================
-// ROUTING
+// ROUTING & ROLE PERMISSIONS
 // ============================================
 
+function applyRolePermissions() {
+  const isOperator = APP.currentUser && APP.currentUser.role !== 'Admin';
+
+  const navDash = document.getElementById('nav-dashboard-tab');
+  const sideDash = document.getElementById('sidebar-dashboard-link');
+
+  if (navDash) navDash.style.display = isOperator ? 'none' : 'flex';
+  if (sideDash) sideDash.style.display = isOperator ? 'none' : 'flex';
+}
+
 function navigateTo(page) {
+  const isOperator = APP.currentUser && APP.currentUser.role !== 'Admin';
+
+  // Strict Role Security Check
+  if (isOperator && page === 'dashboard') {
+    showToast('Akses ditolak: Fitur Dashboard hanya untuk Admin Master!', 'error');
+    navigateTo('scanner');
+    return;
+  }
+
   // Stop scanner when leaving scanner page
   if (page !== 'scanner') stopScanner();
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  applyRolePermissions();
 
   if (page === 'login') {
     document.getElementById('page-login').classList.add('active');
@@ -727,17 +752,41 @@ function navigateTo(page) {
   } else if (page === 'dashboard' || page === 'master-data') {
     document.getElementById('page-admin').classList.add('active');
     const isOperator = APP.currentUser && APP.currentUser.role !== 'Admin';
-    const aside = document.querySelector('#page-admin aside');
-    if (aside) {
-      if (isOperator) aside.classList.add('hidden');
-      else aside.classList.remove('hidden');
+    const drawer = document.getElementById('sidebar-drawer');
+    if (drawer) {
+      if (isOperator) drawer.classList.add('hidden');
+      else drawer.classList.remove('hidden');
     }
     const targetView = (page === 'dashboard' && !isOperator) ? 'dashboard' : 'master-data';
     switchAdminView(targetView);
   }
 }
 
+function toggleMobileSidebar(show) {
+  const drawer = document.getElementById('sidebar-drawer');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!drawer || !backdrop) return;
+
+  if (typeof show !== 'boolean') {
+    show = drawer.classList.contains('-translate-x-full');
+  }
+
+  if (show) {
+    drawer.classList.remove('-translate-x-full');
+    backdrop.classList.remove('hidden');
+  } else {
+    drawer.classList.add('-translate-x-full');
+    backdrop.classList.add('hidden');
+  }
+}
+
 function switchAdminView(view) {
+  const isOperator = APP.currentUser && APP.currentUser.role !== 'Admin';
+  if (isOperator && view === 'dashboard') {
+    showToast('Akses ditolak: Fitur Dashboard hanya untuk Admin Master!', 'error');
+    view = 'master-data';
+  }
+
   document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
 
@@ -836,6 +885,7 @@ function submitLogin() {
     .then(function(result) {
       if (result.success) {
         APP.currentUser = { name: result.name, role: result.role };
+        applyRolePermissions();
         document.getElementById('scanner-operator-name').textContent = result.name;
         document.getElementById('admin-sidebar-name').textContent = result.name;
         document.getElementById('admin-sidebar-role').textContent = result.role;

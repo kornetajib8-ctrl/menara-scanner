@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>MENARA ONLINE SYSTEM</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#93000b",
+        "primary-container": "#b91c1c",
+        "on-primary": "#ffffff",
+        "inverse-primary": "#ffb4ab",
+        "primary-fixed": "#ffdad6",
+        "primary-fixed-dim": "#ffb4ab",
+        "on-primary-fixed": "#410002",
+        "on-primary-fixed-variant": "#93000b",
+        "on-primary-container": "#ffcdc7",
+        "secondary": "#5c5f60",
+        "on-secondary": "#ffffff",
+        "secondary-container": "#e1e3e4",
+        "on-secondary-container": "#626566",
+        "tertiary": "#554242",
+        "on-tertiary": "#ffffff",
+        "tertiary-container": "#6e595a",
+        "on-tertiary-container": "#edd2d2",
+        "tertiary-fixed": "#f8dcdc",
+        "error": "#ba1a1a",
+        "on-error": "#ffffff",
+        "error-container": "#ffdad6",
+        "on-error-container": "#93000a",
+        "background": "#f8f9ff",
+        "on-background": "#121c2a",
+        "surface": "#ffffff",
+        "surface-dim": "#f3f4f6",
+        "surface-bright": "#ffffff",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f5f3f3",
+        "surface-container": "#f9fafb",
+        "surface-container-high": "#f3f4f6",
+        "surface-container-highest": "#d9e3f6",
+        "on-surface": "#121c2a",
+        "on-surface-variant": "#5b403d",
+        "surface-variant": "#f3f4f6",
+        "inverse-surface": "#27313f",
+        "inverse-on-surface": "#eaf1ff",
+        "outline": "#8f6f6c",
+        "outline-variant": "#e4beb9",
+        "surface-tint": "#b91c1c",
+        "status-success": "#15803D",
+        "status-pending": "#CA8A04",
+        "status-error": "#B91C1C",
+        "border-subtle": "#E5E7EB",
+        "surface-muted": "#F3F4F6",
+      },
+      borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+      spacing: { "stack-md": "1rem", "container-max": "1280px", "stack-sm": "0.5rem", "margin-page": "2rem", "stack-lg": "2rem", gutter: "1.5rem" },
+      fontFamily: { sans: ["Inter","sans-serif"], "headline-lg": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "headline-md": ["Inter"], "label-md": ["Inter"], "body-lg": ["Inter"], "mono-data": ["monospace"] },
+      fontSize: {
+        "headline-lg": ["24px", { lineHeight: "1.4", fontWeight: "600" }],
+        "body-sm": ["14px", { lineHeight: "1.6", fontWeight: "400" }],
+        "display-lg": ["32px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-md": ["18px", { lineHeight: "1.4", fontWeight: "600" }],
+        "label-md": ["12px", { lineHeight: "1", letterSpacing: "0.05em", fontWeight: "600" }],
+        "body-lg": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+        "mono-data": ["14px", { lineHeight: "1.5", fontWeight: "400" }]
+      },
+      boxShadow: { soft: "0 2px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.05)" }
+    }
+  }
+};
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; line-height: 1; text-transform: none; letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr; vertical-align: middle; }
+
+  /* Page visibility */
+  .page { display: none; }
+  .page.active { display: flex; }
+
+  /* Admin sub-views */
+  .admin-view { display: none; }
+  .admin-view.active { display: block; }
+
+  /* PIN Dot */
+  .pin-dot.filled { background-color: #93000b; border-color: #93000b; transform: scale(1.2); }
+  .keypad-btn:active { background-color: #f3f4f6; transform: scale(0.95); }
+
+  /* Scanner scan line */
+  @keyframes scanLine { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+  .scan-line { position: absolute; left: 0; width: 100%; height: 3px; background: linear-gradient(to bottom, transparent, #b91c1c, transparent); box-shadow: 0 0 20px 2px rgba(185,28,28,0.6); animation: scanLine 2.5s linear infinite; }
+
+  /* Camera overlay clip-path */
+  .camera-overlay { background: rgba(0,0,0,0.45); clip-path: polygon(0% 0%, 0% 100%, 10% 100%, 10% 15%, 90% 15%, 90% 85%, 10% 85%, 10% 100%, 100% 100%, 100% 0%); }
+
+  /* Sidebar active */
+  .sidebar-active { background-color: rgba(147,0,11,0.08); border-right: 3px solid #93000b; color: #93000b; }
+
+  /* Chart bar animation */
+  .chart-bar { transition: height 1s ease-in-out; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; }
+  .modal-overlay.active { display: flex; }
+
+  /* Toast */
+  .toast { transform: translateY(-20px); opacity: 0; transition: all 0.3s ease; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Loading spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { animation: spin 1s linear infinite; }
+
+  /* Pulse */
+  @keyframes pulse2 { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .animate-pulse2 { animation: pulse2 2s ease-in-out infinite; }
+
+  /* html5-qrcode overrides */
+  #reader video { object-fit: cover !important; border-radius: 0 !important; }
+  #reader { border: none !important; }
+  #reader__scan_region { border: none !important; min-height: 100% !important; }
+  #reader__dashboard { display: none !important; }
+  #reader img { display: none !important; }
+</style>
+</head>
+<body class="bg-background text-on-surface min-h-screen overflow-hidden">
+
+<!-- ============================================ -->
+<!-- TOAST NOTIFICATION -->
+<!-- ============================================ -->
+<div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[200] w-[90vw] max-w-md"></div>
+
+<!-- ============================================ -->
+<!-- LOADING OVERLAY -->
+<!-- ============================================ -->
+<div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[150] flex items-center justify-center" style="display:none;">
+  <div class="flex flex-col items-center gap-4">
+    <svg class="spinner h-10 w-10 text-primary-container" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <p class="text-secondary font-semibold text-sm" id="loading-text">Memproses...</p>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PAGE: LOGIN -->
+<!-- ============================================ -->
+<div id="page-login" class="page active bg-white min-h-screen items-center justify-center">
+  <main class="w-full max-w-md min-h-dvh flex flex-col justify-between p-4 sm:p-8 py-6 bg-white mx-auto overflow-y-auto">
+    <!-- Branding -->
+    <div class="flex flex-col items-center mt-2 sm:mt-6">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 bg-primary rounded-2xl flex items-center justify-center mb-3 sm:mb-6 shadow-xl shadow-primary/10">
+        <span class="material-symbols-outlined text-white" style="font-size:30px;">inventory_2</span>
+      </div>
+      <h1 class="font-display-lg text-2xl sm:text-display-lg text-on-surface text-center tracking-tight">MENARA<br/><span class="text-primary/90">ONLINE SYSTEM</span></h1>
+      <p class="text-secondary mt-2 sm:mt-4 font-medium text-xs sm:text-base">Selamat Datang, Operator</p>
+    </div>
+    <!-- PIN Input -->
+    <div class="flex flex-col items-center my-3">
+      <h2 class="text-secondary font-label-md uppercase tracking-[0.2em] mb-4 sm:mb-8 text-xs sm:text-sm">Masukkan PIN 4-Digit</h2>
+      <div class="flex justify-center gap-6 sm:gap-8 mb-2" id="pin-dots">
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-outline-variant transition-all duration-200"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-outline-variant transition-all duration-200"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-outline-variant transition-all duration-200"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-outline-variant transition-all duration-200"></div>
+      </div>
+      <p id="login-error" class="text-status-error text-xs font-semibold mt-1 h-4"></p>
+    </div>
+    <!-- Keypad -->
+    <div class="mb-4 sm:mb-8">
+      <div class="grid grid-cols-3 gap-y-2 sm:gap-y-4 gap-x-6 sm:gap-x-8 max-w-[260px] sm:max-w-[280px] mx-auto">
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('1')">1</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('2')">2</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('3')">3</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('4')">4</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('5')">5</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('6')">6</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('7')">7</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('8')">8</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('9')">9</button>
+        <div class="aspect-square"></div>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-xl sm:text-2xl font-semibold text-on-surface transition-all" onclick="addPin('0')">0</button>
+        <button class="keypad-btn aspect-square flex items-center justify-center rounded-full text-on-surface-variant transition-all" onclick="clearPin()">
+          <span class="material-symbols-outlined text-xl sm:text-2xl">backspace</span>
+        </button>
+      </div>
+      <!-- Login Button -->
+      <div class="mt-6 sm:mt-10 px-2 sm:px-4">
+        <button class="w-full py-3.5 sm:py-4 bg-primary text-white font-semibold rounded-2xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none text-sm sm:text-base" disabled id="login-btn" onclick="submitLogin()">MASUK KE SISTEM</button>
+        <button class="w-full mt-3 sm:mt-6 text-secondary text-xs sm:text-sm font-medium hover:text-primary transition-colors">Lupa PIN atau Masalah Akses?</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============================================ -->
+<!-- PAGE: SCANNER (Mobile Operator) -->
+<!-- ============================================ -->
+<div id="page-scanner" class="page flex-col h-screen overflow-hidden">
+  <!-- Top Bar -->
+  <header class="bg-surface border-b border-border-subtle flex justify-between items-center w-full px-gutter h-16 shrink-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-primary-fixed-dim flex items-center justify-center overflow-hidden border-2 border-primary-container/20">
+        <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">account_circle</span>
+      </div>
+      <div>
+        <p class="text-on-surface font-bold font-headline-md text-headline-md leading-tight" id="scanner-operator-name">Operator</p>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-status-success shadow-[0_0_8px_rgba(21,128,61,0.5)] animate-pulse"></span>
+          <p class="font-label-md text-label-md text-status-success uppercase tracking-wider">Ready</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button class="hover:bg-surface-container-low p-2.5 rounded-full transition-colors active:scale-95" onclick="navigateTo('dashboard')">
+        <span class="material-symbols-outlined text-on-surface-variant">dashboard</span>
+      </button>
+      <button class="hover:bg-surface-container-low p-2.5 rounded-full transition-colors active:scale-95" onclick="handleLogout()">
+        <span class="material-symbols-outlined text-on-surface-variant">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Camera Viewfinder -->
+  <main class="flex-grow relative bg-black overflow-hidden">
+    <div id="reader" class="absolute inset-0 z-0" style="width:100%;height:100%;"></div>
+
+    <!-- Camera Permission Box Overlay (Hidden by default for instant auto-start) -->
+    <div id="camera-permission-box" class="absolute inset-0 z-40 bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white" style="display:none;">
+      <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4 border border-primary/40">
+        <span class="material-symbols-outlined text-primary text-4xl">videocam</span>
+      </div>
+      <h3 class="text-xl font-bold mb-2">Akses Kamera</h3>
+      <p class="text-slate-300 text-xs mb-6 max-w-xs leading-relaxed" id="camera-status-msg">
+        Tekan Aktifkan Kamera untuk mulai memindai barcode/QR resi paket.
+      </p>
+      <div class="flex flex-col gap-2.5 w-full max-w-xs">
+        <button class="w-full py-3.5 bg-primary text-white font-bold text-sm rounded-2xl shadow-lg shadow-primary/30 active:scale-95 transition-all flex items-center justify-center gap-2" onclick="requestCameraAccess()">
+          <span class="material-symbols-outlined text-lg">photo_camera</span>
+          <span>LIVE CAMERA SCAN</span>
+        </button>
+        <button class="w-full py-3 bg-white/20 text-white font-semibold text-xs rounded-2xl hover:bg-white/30 active:scale-95 transition-all flex items-center justify-center gap-2 border border-white/20" onclick="document.getElementById('file-qr-input').click()">
+          <span class="material-symbols-outlined text-base">center_focus_strong</span>
+          <span>📸 FOTO RESI (IPHONE / SAFARI)</span>
+        </button>
+        <input type="file" id="file-qr-input" accept="image/*" capture="environment" class="hidden" onchange="scanImageFile(this)"/>
+        <button class="w-full py-2.5 bg-white/10 text-white/80 font-medium text-xs rounded-xl hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center gap-2" onclick="openManualScanInput()">
+          <span class="material-symbols-outlined text-base">keyboard</span>
+          <span>INPUT RESI MANUAL</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scan Overlay -->
+    <div class="absolute inset-0 z-10 camera-overlay pointer-events-none"></div>
+    <!-- Framing Box -->
+    <div class="absolute top-[15%] left-[10%] right-[10%] bottom-[15%] z-20 pointer-events-none">
+      <div class="absolute top-0 left-0 w-12 h-12 border-t-[3px] border-l-[3px] border-primary-container rounded-tl-xl"></div>
+      <div class="absolute top-0 right-0 w-12 h-12 border-t-[3px] border-r-[3px] border-primary-container rounded-tr-xl"></div>
+      <div class="absolute bottom-0 left-0 w-12 h-12 border-b-[3px] border-l-[3px] border-primary-container rounded-bl-xl"></div>
+      <div class="absolute bottom-0 right-0 w-12 h-12 border-b-[3px] border-r-[3px] border-primary-container rounded-br-xl"></div>
+      <div class="scan-line"></div>
+    </div>
+    <!-- Instructions -->
+    <div class="absolute bottom-8 left-0 w-full px-gutter z-30 text-center">
+      <div class="bg-black/70 backdrop-blur-xl py-3 px-6 rounded-full inline-flex items-center gap-2 border border-white/20 shadow-2xl" id="scan-instruction">
+        <span class="material-symbols-outlined text-white text-sm" style="font-variation-settings:'opsz' 20;">info</span>
+        <p class="text-white font-medium text-sm tracking-wide">Arahkan kamera ke Resi atau No. Pesanan</p>
+      </div>
+    </div>
+    <!-- Flash Toggle -->
+    <div class="absolute top-6 right-6 z-30">
+      <button class="bg-black/50 backdrop-blur-lg p-3 rounded-full border border-white/20 text-white hover:bg-black/70 active:scale-90 transition-all" id="flash-btn" onclick="toggleFlash()">
+        <span class="material-symbols-outlined">flashlight_on</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- Scan History -->
+  <section class="bg-surface p-gutter shrink-0 h-[280px] overflow-hidden flex flex-col border-t border-border-subtle rounded-t-3xl -mt-6 z-40 relative shadow-[0_-8px_30px_rgba(0,0,0,0.05)]">
+    <div class="flex justify-between items-center mb-4 mt-2">
+      <h3 class="font-bold text-lg text-on-surface">Riwayat Scan Terakhir</h3>
+      <span class="text-primary-container font-semibold text-sm uppercase tracking-wider" id="scan-count-badge">0 SCAN</span>
+    </div>
+    <div class="flex-grow overflow-y-auto space-y-3 pb-24" id="scan-history-list">
+      <div class="text-center text-secondary text-sm py-8">
+        <span class="material-symbols-outlined text-4xl text-border-subtle mb-2 block">qr_code_scanner</span>
+        Belum ada resi yang di-scan
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom Nav -->
+  <nav class="bg-white/80 backdrop-blur-xl border-t border-border-subtle fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <a class="flex flex-col items-center justify-center gap-1" href="#" onclick="event.preventDefault()">
+      <div class="bg-primary-container w-14 h-8 rounded-full flex items-center justify-center text-white mb-0.5">
+        <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1;">barcode_scanner</span>
+      </div>
+      <span class="font-bold text-[11px] text-primary-container uppercase tracking-tight">Scanner</span>
+    </a>
+    <a class="flex flex-col items-center justify-center gap-1" href="#" onclick="event.preventDefault(); navigateTo('master-data')">
+      <div class="w-14 h-8 flex items-center justify-center text-on-surface-variant rounded-full transition-colors">
+        <span class="material-symbols-outlined text-[22px]">package_2</span>
+      </div>
+      <span class="font-medium text-[11px] text-on-surface-variant uppercase tracking-tight">Inventory</span>
+    </a>
+    <a class="flex flex-col items-center justify-center gap-1" href="#" onclick="event.preventDefault(); navigateTo('dashboard')">
+      <div class="w-14 h-8 flex items-center justify-center text-on-surface-variant rounded-full transition-colors">
+        <span class="material-symbols-outlined text-[22px]">grid_view</span>
+      </div>
+      <span class="font-medium text-[11px] text-on-surface-variant uppercase tracking-tight">Dashboard</span>
+    </a>
+  </nav>
+</div>
+
+<!-- ============================================ -->
+<!-- PAGE: ADMIN (Dashboard + Master Data) -->
+<!-- ============================================ -->
+<div id="page-admin" class="page min-h-screen">
+  <!-- Sidebar -->
+  <aside class="fixed left-0 top-0 h-full w-64 bg-white border-r border-border-subtle z-40 hidden md:flex flex-col py-6">
+    <div class="px-6 mb-10 flex items-center gap-3">
+      <div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings:'FILL' 1;">tower</span>
+      </div>
+      <h1 class="text-[16px] font-bold text-on-surface tracking-tight leading-tight">MENARA ONLINE<br/><span class="text-[12px] font-medium text-primary uppercase tracking-[0.15em]">SYSTEM</span></h1>
+    </div>
+    <nav class="flex-1 px-4 space-y-1">
+      <p class="px-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Main Menu</p>
+      <a class="sidebar-link flex items-center gap-3 px-4 py-3 transition-all cursor-pointer" data-view="dashboard" onclick="switchAdminView('dashboard')">
+        <span class="material-symbols-outlined">grid_view</span>
+        <span class="font-semibold text-[14px]">Dashboard</span>
+      </a>
+      <a class="sidebar-link flex items-center gap-3 px-4 py-3 transition-all cursor-pointer" data-view="master-data" onclick="switchAdminView('master-data')">
+        <span class="material-symbols-outlined">inventory_2</span>
+        <span class="font-semibold text-[14px]">Master Data</span>
+      </a>
+      <a class="sidebar-link flex items-center gap-3 px-4 py-3 transition-all cursor-pointer" onclick="navigateTo('scanner')">
+        <span class="material-symbols-outlined">barcode_scanner</span>
+        <span class="font-semibold text-[14px]">Scanner</span>
+      </a>
+    </nav>
+    <div class="px-4 mt-auto space-y-1 pt-6 border-t border-border-subtle">
+      <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant/50 transition-all cursor-pointer" onclick="handleLogout()">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="font-medium text-[14px]">Logout</span>
+      </a>
+      <div class="p-4 mt-4 bg-surface-container-low rounded-xl flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs" id="admin-avatar">A</div>
+        <div class="flex flex-col min-w-0">
+          <span class="text-on-surface text-[13px] font-bold truncate" id="admin-sidebar-name">Admin</span>
+          <span class="text-on-surface-variant text-[11px]" id="admin-sidebar-role">Admin Master</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 md:ml-64 min-h-screen flex flex-col">
+    <!-- Top Bar -->
+    <header class="sticky top-0 z-30 bg-white border-b border-border-subtle h-16">
+      <div class="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-full">
+        <div class="flex items-center gap-4">
+          <button class="md:hidden text-primary" onclick="document.querySelector('#page-admin aside').classList.toggle('hidden')">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <h2 class="font-headline-lg text-on-surface text-lg font-bold" id="admin-page-title">Dashboard Rekapitulasi</h2>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border-subtle hover:bg-surface-container-low rounded-xl text-xs font-bold transition-all text-on-surface" onclick="openModal('modal-add-store')">
+            <span class="material-symbols-outlined text-sm">store</span>
+            <span>Tambah Toko</span>
+          </button>
+          <button class="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-xs font-bold transition-all" onclick="navigateTo('scanner')">
+            <span class="material-symbols-outlined text-sm">barcode_scanner</span>
+            <span>Buka Scanner</span>
+          </button>
+          <div class="relative hidden sm:block">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-lg">search</span>
+            <input class="pl-10 pr-4 py-2 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all w-64" placeholder="Cari No. Resi..." type="text" id="admin-search" onkeyup="handleAdminSearch(this.value)"/>
+          </div>
+          <button class="flex items-center gap-2 p-1.5 hover:bg-surface-container-low rounded-full transition-colors" onclick="handleLogout()" title="Logout">
+            <span class="material-symbols-outlined text-on-surface-variant">logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================== -->
+    <!-- VIEW: Dashboard -->
+    <!-- ==================== -->
+    <div id="view-dashboard" class="admin-view active p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
+      <!-- KPI Cards -->
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-5 rounded-xl shadow-soft border border-border-subtle hover:border-primary/30 transition-all">
+          <div class="flex justify-between items-start mb-3">
+            <div class="bg-primary/10 p-2.5 rounded-lg"><span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings:'FILL' 1;">package_2</span></div>
+            <div class="flex items-center gap-1.5 bg-status-success/10 px-2 py-1 rounded text-status-success">
+              <span class="material-symbols-outlined text-[14px]">trending_up</span>
+              <span class="text-[12px] font-bold">Live</span>
+            </div>
+          </div>
+          <p class="text-on-surface-variant text-[12px] font-semibold uppercase tracking-wider">Total Paket Hari Ini</p>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-[28px] font-extrabold text-on-surface tabular-nums" id="kpi-total">—</span>
+            <span class="text-[11px] text-on-surface-variant">paket</span>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl shadow-soft border border-border-subtle hover:border-status-pending/30 transition-all">
+          <div class="flex justify-between items-start mb-3">
+            <div class="bg-status-pending/10 p-2.5 rounded-lg"><span class="material-symbols-outlined text-status-pending text-[22px]">pending_actions</span></div>
+            <div class="flex items-center gap-1.5 bg-status-pending/10 px-2 py-1 rounded text-status-pending">
+              <span class="material-symbols-outlined text-[14px]">priority_high</span>
+              <span class="text-[12px] font-bold">Priority</span>
+            </div>
+          </div>
+          <p class="text-on-surface-variant text-[12px] font-semibold uppercase tracking-wider">Belum Scan (Perlu Dikirim)</p>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-[28px] font-extrabold text-on-surface tabular-nums" id="kpi-pending">—</span>
+            <span class="text-[11px] text-on-surface-variant">antrean</span>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl shadow-soft border border-border-subtle hover:border-status-success/30 transition-all">
+          <div class="flex justify-between items-start mb-3">
+            <div class="bg-status-success/10 p-2.5 rounded-lg"><span class="material-symbols-outlined text-status-success text-[22px]">local_shipping</span></div>
+            <div class="flex items-center gap-1.5 bg-status-success/10 px-2 py-1 rounded text-status-success">
+              <span class="material-symbols-outlined text-[14px]">verified</span>
+              <span class="text-[12px] font-bold">On Track</span>
+            </div>
+          </div>
+          <p class="text-on-surface-variant text-[12px] font-semibold uppercase tracking-wider">Selesai Scan (Sedang Dikirim)</p>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-[28px] font-extrabold text-on-surface tabular-nums" id="kpi-shipped">—</span>
+            <span class="text-[11px] text-on-surface-variant">terkirim</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart & Activity -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+        <!-- Bar Chart -->
+        <div class="lg:col-span-8 bg-white border border-border-subtle rounded-xl p-6 md:p-8 shadow-soft">
+          <div class="flex justify-between items-start mb-8">
+            <div>
+              <h4 class="text-[16px] font-bold text-on-surface">Performa Kurir</h4>
+              <p class="text-[13px] text-on-surface-variant mt-1">Volume pengiriman per layanan ekspedisi</p>
+            </div>
+          </div>
+          <div class="h-52 md:h-64 flex items-end justify-around gap-4 md:gap-8 pb-4" id="chart-bars">
+            <div class="text-center text-secondary text-sm py-8 w-full">Memuat data...</div>
+          </div>
+        </div>
+        <!-- Recent Activity -->
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-white border border-border-subtle rounded-xl p-6 shadow-soft">
+            <div class="flex justify-between items-center mb-6">
+              <h4 class="text-[16px] font-bold text-on-surface">Status Terakhir</h4>
+            </div>
+            <div class="space-y-5" id="recent-activity">
+              <div class="text-sm text-secondary">Memuat...</div>
+            </div>
+          </div>
+          <div class="bg-primary rounded-xl p-6 text-white overflow-hidden relative group shadow-lg">
+            <div class="relative z-10">
+              <h5 class="text-[16px] font-bold mb-2">Pusat Bantuan</h5>
+              <p class="text-[12px] opacity-90 mb-5 leading-relaxed">Butuh bantuan teknis terkait operasional scanner atau sistem gudang?</p>
+              <button class="bg-white text-primary px-5 py-2.5 rounded-lg text-[12px] font-bold hover:shadow-lg transition-all active:scale-95">Hubungi IT Support</button>
+            </div>
+            <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-[120px] opacity-10 rotate-12 group-hover:scale-110 transition-transform">support_agent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard Table -->
+      <section class="mt-8 bg-white border border-border-subtle rounded-xl overflow-hidden shadow-soft">
+        <div class="px-6 md:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b border-border-subtle">
+          <div>
+            <h4 class="text-[16px] font-bold text-on-surface">Detail Rekapitulasi Paket</h4>
+            <p class="text-[12px] text-on-surface-variant mt-0.5">Daftar rekapitulasi paket masuk dan keluar real-time</p>
+          </div>
+          <div class="flex gap-3">
+            <button class="flex items-center gap-2 px-4 py-2 border border-border-subtle rounded-lg text-[13px] font-bold hover:bg-surface-container-low transition-colors" onclick="loadDashboard()">
+              <span class="material-symbols-outlined text-[18px]">refresh</span> Refresh
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead><tr class="bg-surface-container-low/50">
+              <th class="px-6 md:px-8 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest border-b border-border-subtle">No. Resi</th>
+              <th class="px-6 md:px-8 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest border-b border-border-subtle">Layanan</th>
+              <th class="px-6 md:px-8 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest border-b border-border-subtle hidden md:table-cell">Toko</th>
+              <th class="px-6 md:px-8 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest border-b border-border-subtle hidden md:table-cell">Waktu</th>
+              <th class="px-6 md:px-8 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest border-b border-border-subtle text-right">Status</th>
+            </tr></thead>
+            <tbody class="divide-y divide-border-subtle/50" id="dashboard-table-body">
+              <tr><td colspan="5" class="px-8 py-8 text-center text-secondary text-sm">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== -->
+    <!-- VIEW: Master Data -->
+    <!-- ==================== -->
+    <div id="view-master-data" class="admin-view p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
+      <!-- Header Actions -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <nav class="flex text-xs text-secondary mb-2 gap-2">
+            <span class="hover:text-primary cursor-pointer" onclick="switchAdminView('dashboard')">Dashboard</span>
+            <span>/</span>
+            <span class="text-on-surface font-semibold">Master Data</span>
+          </nav>
+          <p class="text-secondary font-body-sm text-body-sm">Manage orders and logistics data in real-time.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="flex items-center px-4 py-2.5 bg-white border border-border-subtle text-on-surface font-semibold text-sm rounded-xl hover:bg-surface-container-low transition-colors shadow-sm" onclick="openModal('modal-add-store')">
+            <span class="material-symbols-outlined mr-2 text-lg">store</span>Tambah Toko
+          </button>
+          <button class="flex items-center px-6 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-primary/20" onclick="openModal('modal-upload')">
+            <span class="material-symbols-outlined mr-2 text-lg">upload_file</span>Upload Excel Shopee
+          </button>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-primary/10 rounded-xl"><span class="material-symbols-outlined text-primary">pending_actions</span></div>
+            <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-bold uppercase tracking-wider">Priority</span>
+          </div>
+          <p class="text-secondary text-sm font-medium">Perlu Dikirim</p>
+          <h3 class="text-3xl font-bold text-on-surface mt-1" id="md-stat-pending">—</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-blue-50 rounded-xl"><span class="material-symbols-outlined text-blue-600">local_shipping</span></div>
+          </div>
+          <p class="text-secondary text-sm font-medium">Sedang Dikirim</p>
+          <h3 class="text-3xl font-bold text-on-surface mt-1" id="md-stat-shipped">—</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-green-50 rounded-xl"><span class="material-symbols-outlined text-green-600">check_circle</span></div>
+          </div>
+          <p class="text-secondary text-sm font-medium">Total Data</p>
+          <h3 class="text-3xl font-bold text-on-surface mt-1" id="md-stat-total">—</h3>
+        </div>
+        <div class="bg-primary p-6 rounded-2xl shadow-xl shadow-primary/10 text-white flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-white/20 rounded-xl"><span class="material-symbols-outlined">analytics</span></div>
+          </div>
+          <p class="text-white/80 text-sm font-medium">Efisiensi Scan</p>
+          <h3 class="text-3xl font-bold mt-1" id="md-stat-efficiency">—</h3>
+          <div class="mt-3 h-1.5 w-full bg-white/20 rounded-full"><div class="h-full bg-white rounded-full shadow-sm shadow-white/50" id="md-efficiency-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="bg-white rounded-2xl border border-border-subtle overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-border-subtle flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-3">
+            <h4 class="font-bold text-xl text-on-surface">Rincian Pesanan</h4>
+            <span class="bg-surface-container-low text-secondary text-xs px-3 py-1 rounded-full font-bold" id="md-total-badge">0 TOTAL</span>
+          </div>
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="relative flex-1 sm:w-72">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-lg">filter_alt</span>
+              <input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" placeholder="Filter by Resi / Toko" type="text" id="md-filter-input" onkeyup="handleMasterFilter()"/>
+            </div>
+            <button class="p-2.5 border border-border-subtle rounded-xl hover:bg-surface-container-low text-secondary transition-colors" onclick="loadMasterData()">
+              <span class="material-symbols-outlined">refresh</span>
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-surface-container-low/50"><tr>
+              <th class="px-6 py-5 font-bold text-xs text-secondary uppercase tracking-widest">Nama Toko</th>
+              <th class="px-6 py-5 font-bold text-xs text-secondary uppercase tracking-widest">Status</th>
+              <th class="px-6 py-5 font-bold text-xs text-secondary uppercase tracking-widest">No. Pesanan</th>
+              <th class="px-6 py-5 font-bold text-xs text-secondary uppercase tracking-widest">No. Resi</th>
+              <th class="px-6 py-5 font-bold text-xs text-secondary uppercase tracking-widest hidden md:table-cell">Ekspedisi</th>
+              <th class="px-6 py-5 font-bold text-xs text-secondary uppercase tracking-widest hidden md:table-cell">Waktu Scan</th>
+              <th class="px-6 py-5 font-bold text-xs text-secondary uppercase tracking-widest text-right hidden md:table-cell">Operator</th>
+            </tr></thead>
+            <tbody class="divide-y divide-border-subtle/50" id="md-table-body">
+              <tr><td colspan="7" class="px-6 py-8 text-center text-secondary text-sm">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-6 py-5 border-t border-border-subtle flex flex-col sm:flex-row justify-between items-center gap-4 bg-white">
+          <p class="text-secondary text-xs font-medium" id="md-pagination-info">Showing 0 entries</p>
+          <div class="flex items-center gap-2" id="md-pagination-controls"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="p-gutter max-w-container-max mx-auto w-full text-secondary text-[11px] text-center py-8 opacity-70">
+      © 2024 MENARA ONLINE SYSTEM v2.4.1. Precision Logistics &amp; Distribution Ecosystem.
+    </footer>
+  </main>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: Upload Excel -->
+<!-- ============================================ -->
+<div class="modal-overlay" id="modal-upload">
+  <div class="bg-white rounded-2xl w-[90vw] max-w-lg p-8 shadow-2xl relative">
+    <button class="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors" onclick="closeModal('modal-upload')">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="flex items-center gap-3 mb-6">
+      <div class="p-2.5 bg-primary/10 rounded-xl"><span class="material-symbols-outlined text-primary">upload_file</span></div>
+      <div>
+        <h3 class="font-bold text-lg text-on-surface">Upload Excel Shopee</h3>
+        <p class="text-secondary text-xs">Unggah file pesanan dari Shopee Seller Center</p>
+      </div>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-on-surface mb-2">Pilih Toko</label>
+        <select class="w-full px-4 py-3 border border-border-subtle rounded-xl text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary/30 outline-none bg-white" id="upload-store-select">
+          <option value="">-- Pilih Toko --</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-on-surface mb-2">File Excel (.xlsx)</label>
+        <div class="border-2 border-dashed border-border-subtle rounded-xl p-8 text-center hover:border-primary/30 transition-colors cursor-pointer" onclick="document.getElementById('upload-file-input').click()">
+          <span class="material-symbols-outlined text-4xl text-border-subtle mb-2">cloud_upload</span>
+          <p class="text-secondary text-sm" id="upload-file-label">Klik untuk memilih file atau drag & drop</p>
+          <p class="text-xs text-secondary/60 mt-1">Format: .xlsx, .xls</p>
+          <input type="file" accept=".xlsx,.xls" class="hidden" id="upload-file-input" onchange="handleFileSelect(this)"/>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-8">
+      <button class="flex-1 py-3 border border-border-subtle rounded-xl font-semibold text-sm hover:bg-surface-container-low transition-colors" onclick="closeModal('modal-upload')">Batal</button>
+      <button class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20 disabled:opacity-40" id="upload-submit-btn" disabled onclick="handleUpload()">Upload Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: Add Store -->
+<!-- ============================================ -->
+<div class="modal-overlay" id="modal-add-store">
+  <div class="bg-white rounded-2xl w-[90vw] max-w-md p-8 shadow-2xl relative">
+    <button class="absolute top-4 right-4 text-secondary hover:text-on-surface transition-colors" onclick="closeModal('modal-add-store')">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="flex items-center gap-3 mb-6">
+      <div class="p-2.5 bg-primary/10 rounded-xl"><span class="material-symbols-outlined text-primary">store</span></div>
+      <h3 class="font-bold text-lg text-on-surface">Tambah Toko Baru</h3>
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-on-surface mb-2">Nama Toko</label>
+      <input class="w-full px-4 py-3 border border-border-subtle rounded-xl text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary/30 outline-none" placeholder="Contoh: Ajib Official" id="new-store-name"/>
+    </div>
+    <div class="flex gap-3 mt-8">
+      <button class="flex-1 py-3 border border-border-subtle rounded-xl font-semibold text-sm hover:bg-surface-container-low transition-colors" onclick="closeModal('modal-add-store')">Batal</button>
+      <button class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20" onclick="handleAddStore()">Tambah Toko</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: Scan Result -->
+<!-- ============================================ -->
+<div class="modal-overlay" id="modal-scan-result">
+  <div class="bg-white rounded-2xl w-[90vw] max-w-sm p-8 shadow-2xl text-center" id="scan-result-content">
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT -->
+<!-- ============================================ -->
+<script>
+// ---- Global State ----
+const APP = {
+  currentUser: null,
+  currentPin: '',
+  scanner: null,
+  scannerRunning: false,
+  scanHistory: [],
+  scanCount: 0,
+  masterPage: 1,
+  masterFilter: '',
+  masterFilterTimer: null,
+  uploadedData: null
+};
+
+// ============================================
+// ROUTING
+// ============================================
+
+function navigateTo(page) {
+  // Stop scanner when leaving scanner page
+  if (page !== 'scanner') stopScanner();
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  if (page === 'login') {
+    document.getElementById('page-login').classList.add('active');
+  } else if (page === 'scanner') {
+    document.getElementById('page-scanner').classList.add('active');
+    startScanner();
+    loadScanHistory();
+  } else if (page === 'dashboard' || page === 'master-data') {
+    document.getElementById('page-admin').classList.add('active');
+    const isOperator = APP.currentUser && APP.currentUser.role !== 'Admin';
+    const aside = document.querySelector('#page-admin aside');
+    if (aside) {
+      if (isOperator) aside.classList.add('hidden');
+      else aside.classList.remove('hidden');
+    }
+    const targetView = (page === 'dashboard' && !isOperator) ? 'dashboard' : 'master-data';
+    switchAdminView(targetView);
+  }
+}
+
+function switchAdminView(view) {
+  document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+
+  // Update sidebar active state
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.classList.remove('sidebar-active');
+    link.classList.add('text-on-surface-variant', 'hover:bg-surface-variant/50');
+    if (link.dataset.view === view) {
+      link.classList.add('sidebar-active');
+      link.classList.remove('text-on-surface-variant', 'hover:bg-surface-variant/50');
+    }
+  });
+
+  // Update title
+  const titles = { 'dashboard': 'Dashboard Rekapitulasi', 'master-data': 'Master Data Management' };
+  document.getElementById('admin-page-title').textContent = titles[view] || 'Dashboard';
+
+  if (view === 'dashboard') loadDashboard();
+  if (view === 'master-data') { loadMasterData(); loadStoreDropdown(); }
+}
+
+// ============================================
+// HYBRID REST API & GOOGLE APPS SCRIPT HELPER
+// ============================================
+
+const APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbx0zxqpmzOjNdJ9ZzmNi7lwbLYtpFfBz48_Y29OuVKmEv-v96-ZbWByG7rdbcA-C1mKnw/exec';
+
+function callApi(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    if (window.google && google.script && google.script.run) {
+      const run = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      if (action === 'validatePin') run.validatePin(params.pin);
+      else if (action === 'processScannedCode') run.processScannedCode(params.code, params.operatorName);
+      else if (action === 'getDashboardStats') run.getDashboardStats();
+      else if (action === 'getMasterData') run.getMasterData(params.page, params.pageSize, params.filter);
+      else if (action === 'getStoreList') run.getStoreList();
+      else if (action === 'addNewStore') run.addNewStore(params.storeName);
+      else if (action === 'getScanHistory') run.getScanHistory(params.operatorName);
+      else if (action === 'uploadExcelData') run.uploadExcelData(JSON.stringify(params.jsonData), params.storeName);
+      else reject(new Error('Unknown action: ' + action));
+    } else {
+      const url = new URL(APPS_SCRIPT_API_URL);
+      url.searchParams.append('action', action);
+      Object.keys(params).forEach(k => {
+        if (typeof params[k] === 'object') url.searchParams.append(k, JSON.stringify(params[k]));
+        else url.searchParams.append(k, params[k]);
+      });
+
+      fetch(url.toString())
+        .then(res => res.json())
+        .then(resolve)
+        .catch(reject);
+    }
+  });
+}
+
+// ============================================
+// PIN LOGIN
+// ============================================
+
+function addPin(num) {
+  if (APP.currentPin.length < 4) {
+    APP.currentPin += num;
+    updatePinDots();
+    if ('vibrate' in navigator) navigator.vibrate(15);
+    if (APP.currentPin.length === 4) {
+      setTimeout(submitLogin, 150);
+    }
+  }
+}
+
+function clearPin() {
+  if (APP.currentPin.length > 0) {
+    APP.currentPin = APP.currentPin.slice(0, -1);
+    updatePinDots();
+  }
+}
+
+function updatePinDots() {
+  const dots = document.querySelectorAll('#pin-dots .pin-dot');
+  dots.forEach((dot, i) => {
+    if (i < APP.currentPin.length) dot.classList.add('filled');
+    else dot.classList.remove('filled');
+  });
+  document.getElementById('login-btn').disabled = APP.currentPin.length !== 4;
+  document.getElementById('login-error').textContent = '';
+}
+
+function submitLogin() {
+  if (APP.currentPin.length !== 4) return;
+  const btn = document.getElementById('login-btn');
+  btn.innerHTML = '<div class="flex items-center justify-center gap-3"><svg class="spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>MEMPROSES...</span></div>';
+  btn.disabled = true;
+
+  callApi('validatePin', { pin: APP.currentPin })
+    .then(function(result) {
+      if (result.success) {
+        APP.currentUser = { name: result.name, role: result.role };
+        document.getElementById('scanner-operator-name').textContent = result.name;
+        document.getElementById('admin-sidebar-name').textContent = result.name;
+        document.getElementById('admin-sidebar-role').textContent = result.role;
+        document.getElementById('admin-avatar').textContent = result.name.charAt(0).toUpperCase();
+
+        showToast('Selamat datang, ' + result.name + '!', 'success');
+
+        if (result.role === 'Admin') {
+          navigateTo('dashboard');
+        } else {
+          navigateTo('scanner');
+        }
+      } else {
+        document.getElementById('login-error').textContent = result.message;
+        shakeElement(document.getElementById('pin-dots'));
+        playBuzzer();
+      }
+      resetLoginBtn();
+    })
+    .catch(function(err) {
+      document.getElementById('login-error').textContent = 'Koneksi gagal. Coba lagi.';
+      resetLoginBtn();
+    });
+}
+
+function resetLoginBtn() {
+  APP.currentPin = '';
+  updatePinDots();
+  const btn = document.getElementById('login-btn');
+  btn.innerHTML = 'MASUK KE SISTEM';
+  btn.disabled = true;
+}
+
+function handleLogout() {
+  stopScanner();
+  APP.currentUser = null;
+  APP.currentPin = '';
+  APP.scanHistory = [];
+  APP.scanCount = 0;
+  updatePinDots();
+  navigateTo('login');
+  showToast('Berhasil logout.', 'info');
+}
+
+// ============================================
+// SCANNER (html5-qrcode)
+// ============================================
+
+function openManualScanInput() {
+  const code = prompt("Masukkan / Tempel No. Resi atau No. Pesanan:");
+  if (code && code.trim()) {
+    onScanSuccess(code.trim());
+  }
+}
+
+function scanImageFile(input) {
+  if (input.files && input.files[0]) {
+    showToast('Membaca barcode dari foto...', 'info');
+    const file = input.files[0];
+    const scanner = APP.scanner || new Html5Qrcode("reader");
+    scanner.scanFile(file, true)
+      .then(function(decodedText) {
+        showToast('Barcode berhasil dibaca!', 'success');
+        onScanSuccess(decodedText);
+        input.value = '';
+      })
+      .catch(function(err) {
+        console.warn("File scan error:", err);
+        showToast('Barcode tidak terdeteksi dari foto. Coba foto lebih dekat & fokus.', 'error');
+        input.value = '';
+      });
+  }
+}
+
+function requestCameraAccess() {
+  if (APP.scannerRunning) {
+    stopScanner();
+  }
+  if (APP.scanner) {
+    try { APP.scanner.clear(); } catch(e) {}
+    APP.scanner = null;
+  }
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    showToast('Meminta izin kamera...', 'info');
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function(stream) {
+        stream.getTracks().forEach(function(track) { track.stop(); });
+        document.getElementById('camera-permission-box').style.display = 'none';
+        initHtml5Qrcode();
+      })
+      .catch(function(err) {
+        console.warn("Camera permission error:", err);
+        showToast('Gagal kamera: ' + (err.message || err), 'error');
+        document.getElementById('camera-permission-box').style.display = 'flex';
+      });
+  } else {
+    initHtml5Qrcode();
+  }
+}
+
+function startScanner() {
+  if (APP.scannerRunning) return;
+  document.getElementById('camera-permission-box').style.display = 'none';
+  initHtml5Qrcode();
+}
+
+function initHtml5Qrcode() {
+  if (APP.scannerRunning) return;
+  document.getElementById('camera-permission-box').style.display = 'none';
+
+  if (APP.scanner) {
+    try { APP.scanner.clear(); } catch(e) {}
+    APP.scanner = null;
+  }
+
+  try {
+    APP.scanner = new Html5Qrcode("reader");
+  } catch(e) {
+    console.warn("Scanner creation error:", e);
+  }
+
+  // Step 1: Try getCameras() for exact camera ID
+  Html5Qrcode.getCameras().then(function(cameras) {
+    if (cameras && cameras.length > 0) {
+      let backCam = cameras.find(c => {
+        const label = c.label.toLowerCase();
+        return label.includes('back') || label.includes('rear') || label.includes('environment') || label.includes('belakang');
+      });
+      if (!backCam) backCam = cameras[cameras.length - 1];
+      startCameraWithId(backCam.id);
+    } else {
+      startCameraWithConstraint({ facingMode: "environment" });
+    }
+  }).catch(function(err) {
+    console.warn("getCameras error, using constraint fallback:", err);
+    startCameraWithConstraint({ facingMode: "environment" });
+  });
+}
+
+function startCameraWithId(cameraId) {
+  const config = {
+    fps: 10,
+    qrbox: function(w, h) {
+      return { width: Math.floor(w * 0.8), height: Math.floor(h * 0.6) };
+    },
+    aspectRatio: 1.0
+  };
+
+  APP.scanner.start(
+    cameraId,
+    config,
+    onScanSuccess,
+    function() {}
+  ).then(function() {
+    APP.scannerRunning = true;
+    showToast('Kamera aktif! Arahkan ke resi.', 'success');
+  }).catch(function(err) {
+    console.warn("Start with camera ID failed, clearing instance & retrying with constraint...", err);
+    resetScannerInstance();
+    startCameraWithConstraint({ facingMode: "environment" });
+  });
+}
+
+function startCameraWithConstraint(constraint) {
+  const config = {
+    fps: 10,
+    qrbox: function(w, h) {
+      return { width: Math.floor(w * 0.8), height: Math.floor(h * 0.6) };
+    },
+    aspectRatio: 1.0
+  };
+
+  resetScannerInstance();
+
+  APP.scanner.start(
+    constraint,
+    config,
+    onScanSuccess,
+    function() {}
+  ).then(function() {
+    APP.scannerRunning = true;
+    showToast('Kamera aktif! Arahkan ke resi.', 'success');
+  }).catch(function(err) {
+    console.warn("Constraint failed, trying ultimate fallback (true)...", err);
+    resetScannerInstance();
+
+    // Step 3: Ultimate fallback to plain true boolean constraint
+    APP.scanner.start(
+      true,
+      config,
+      onScanSuccess,
+      function() {}
+    ).then(function() {
+      APP.scannerRunning = true;
+      showToast('Kamera aktif!', 'success');
+    }).catch(function(finalErr) {
+      console.error("All camera start attempts failed:", finalErr);
+      document.getElementById('camera-permission-box').style.display = 'flex';
+      const errMsg = finalErr.message || finalErr.name || finalErr.toString();
+      showToast('Kamera gagal: ' + errMsg + '. Gunakan Foto Resi atau Input Manual.', 'error');
+    });
+  });
+}
+
+function resetScannerInstance() {
+  if (APP.scanner) {
+    try { APP.scanner.clear(); } catch(e) {}
+    APP.scanner = null;
+  }
+  try {
+    APP.scanner = new Html5Qrcode("reader");
+  } catch(e) {}
+}
+
+function stopScanner() {
+  if (APP.scanner && APP.scannerRunning) {
+    APP.scanner.stop().then(function() {
+      APP.scannerRunning = false;
+      APP.scanner.clear();
+    }).catch(function() {
+      APP.scannerRunning = false;
+    });
+  }
+}
+
+function toggleFlash() {
+  if (APP.scanner && APP.scannerRunning) {
+    APP.scanner.getRunningTrackCameraCapabilities().then(function(caps) {
+      if (caps.torchFeature && caps.torchFeature().isSupported()) {
+        const current = caps.torchFeature().value();
+        caps.torchFeature().apply(!current);
+      }
+    }).catch(function() {});
+  }
+}
+
+let lastScanTime = 0;
+function onScanSuccess(decodedText) {
+  const now = Date.now();
+  if (now - lastScanTime < 3000) return; // 3s cooldown
+  lastScanTime = now;
+
+  if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+
+  // Show processing state
+  const instruction = document.getElementById('scan-instruction');
+  instruction.innerHTML = '<svg class="spinner h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="text-white font-medium text-sm">Memproses: ' + decodedText + '</p>';
+
+  callApi('processScannedCode', { code: decodedText, operatorName: APP.currentUser ? APP.currentUser.name : 'Unknown' })
+    .then(function(result) {
+      showScanResult(result, decodedText);
+      instruction.innerHTML = '<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings:\'opsz\' 20;">info</span><p class="text-white font-medium text-sm tracking-wide">Arahkan kamera ke Resi atau No. Pesanan</p>';
+    })
+    .catch(function(err) {
+      showToast('Gagal memproses scan. Coba lagi.', 'error');
+      instruction.innerHTML = '<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings:\'opsz\' 20;">info</span><p class="text-white font-medium text-sm tracking-wide">Arahkan kamera ke Resi atau No. Pesanan</p>';
+    });
+}
+
+function showScanResult(result, code) {
+  const modal = document.getElementById('modal-scan-result');
+  const content = document.getElementById('scan-result-content');
+
+  if (result.success) {
+    playSuccess();
+    APP.scanCount++;
+    document.getElementById('scan-count-badge').textContent = APP.scanCount + ' SCAN';
+
+    // Add to history
+    addToScanHistory({ code: code, status: 'success', time: new Date(), data: result });
+
+    content.innerHTML = `
+      <div class="w-16 h-16 rounded-full bg-status-success/10 flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-status-success text-4xl" style="font-variation-settings:'FILL' 1;">check_circle</span>
+      </div>
+      <h3 class="text-xl font-bold text-on-surface mb-1">Berhasil!</h3>
+      <p class="text-secondary text-sm mb-4">${result.message}</p>
+      <div class="bg-surface-container-low rounded-xl p-4 text-left space-y-2 mb-6">
+        <div class="flex justify-between"><span class="text-xs text-secondary">Toko</span><span class="text-xs font-bold">${result.store}</span></div>
+        <div class="flex justify-between"><span class="text-xs text-secondary">No. Pesanan</span><span class="text-xs font-mono-data font-bold">${result.order}</span></div>
+        <div class="flex justify-between"><span class="text-xs text-secondary">No. Resi</span><span class="text-xs font-mono-data font-bold">${result.resi}</span></div>
+        <div class="flex justify-between"><span class="text-xs text-secondary">Ekspedisi</span><span class="text-xs font-bold">${result.ekspedisi}</span></div>
+        <div class="flex justify-between"><span class="text-xs text-secondary">Ditemukan via</span><span class="text-xs font-bold text-primary">${result.matchType}</span></div>
+      </div>
+      <button class="w-full py-3 bg-status-success text-white rounded-xl font-semibold text-sm" onclick="closeModal('modal-scan-result')">Lanjut Scan</button>
+    `;
+  } else {
+    playBuzzer();
+    if (result.alreadyScanned) {
+      addToScanHistory({ code: code, status: 'duplicate', time: new Date(), data: result });
+      content.innerHTML = `
+        <div class="w-16 h-16 rounded-full bg-status-pending/10 flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-status-pending text-4xl">warning</span>
+        </div>
+        <h3 class="text-xl font-bold text-on-surface mb-1">Sudah Di-Scan</h3>
+        <p class="text-secondary text-sm mb-4">${result.message}</p>
+        <div class="bg-surface-container-low rounded-xl p-4 text-left space-y-2 mb-6">
+          <div class="flex justify-between"><span class="text-xs text-secondary">No. Pesanan</span><span class="text-xs font-mono-data font-bold">${result.order || '-'}</span></div>
+          <div class="flex justify-between"><span class="text-xs text-secondary">Operator Scan</span><span class="text-xs font-bold">${result.operator || '-'}</span></div>
+          <div class="flex justify-between"><span class="text-xs text-secondary">Waktu Scan</span><span class="text-xs font-bold">${result.waktu || '-'}</span></div>
+        </div>
+        <button class="w-full py-3 bg-status-pending text-white rounded-xl font-semibold text-sm" onclick="closeModal('modal-scan-result')">OK, Lanjut</button>
+      `;
+    } else {
+      addToScanHistory({ code: code, status: 'error', time: new Date(), data: result });
+      content.innerHTML = `
+        <div class="w-16 h-16 rounded-full bg-status-error/10 flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-status-error text-4xl">error</span>
+        </div>
+        <h3 class="text-xl font-bold text-on-surface mb-1">Tidak Ditemukan</h3>
+        <p class="text-secondary text-sm mb-4">${result.message}</p>
+        <p class="text-xs font-mono-data text-secondary mb-6 bg-surface-container-low rounded-lg p-3">Kode: ${code}</p>
+        <button class="w-full py-3 bg-status-error text-white rounded-xl font-semibold text-sm" onclick="closeModal('modal-scan-result')">Coba Lagi</button>
+      `;
+    }
+  }
+
+  openModal('modal-scan-result');
+}
+
+function addToScanHistory(item) {
+  APP.scanHistory.unshift(item);
+  if (APP.scanHistory.length > 20) APP.scanHistory.pop();
+  renderScanHistory();
+}
+
+function renderScanHistory() {
+  const container = document.getElementById('scan-history-list');
+  if (APP.scanHistory.length === 0) {
+    container.innerHTML = '<div class="text-center text-secondary text-sm py-8"><span class="material-symbols-outlined text-4xl text-border-subtle mb-2 block">qr_code_scanner</span>Belum ada resi yang di-scan</div>';
+    return;
+  }
+
+  container.innerHTML = APP.scanHistory.map(function(item) {
+    const statusConfig = {
+      success:   { bg: 'bg-status-success/5', border: 'border-status-success/10', iconColor: 'text-status-success', label: 'Berhasil',      labelBg: 'bg-status-success/10', labelBorder: 'border-status-success/20', labelColor: 'text-status-success' },
+      error:     { bg: 'bg-status-error/5',   border: 'border-status-error/10',   iconColor: 'text-status-error',   label: 'Tidak Ditemukan', labelBg: 'bg-status-error/10',   labelBorder: 'border-status-error/20',   labelColor: 'text-status-error' },
+      duplicate: { bg: 'bg-status-pending/5',  border: 'border-status-pending/10', iconColor: 'text-status-pending', label: 'Duplikat',       labelBg: 'bg-status-pending/10', labelBorder: 'border-status-pending/20', labelColor: 'text-status-pending' }
+    };
+    const s = statusConfig[item.status];
+    const timeStr = getTimeAgo(item.time);
+    const icon = item.status === 'success' ? 'package_2' : item.status === 'duplicate' ? 'warning' : 'error';
+
+    return '<div class="bg-white border border-border-subtle p-4 rounded-2xl flex items-center justify-between shadow-sm">' +
+      '<div class="flex items-center gap-4">' +
+        '<div class="' + s.bg + ' w-12 h-12 rounded-xl flex items-center justify-center border ' + s.border + '">' +
+          '<span class="material-symbols-outlined ' + s.iconColor + '" style="font-variation-settings:\'FILL\' 1;">' + icon + '</span>' +
+        '</div>' +
+        '<div>' +
+          '<p class="font-bold text-on-surface text-[15px]">' + item.code + '</p>' +
+          '<p class="text-secondary text-xs mt-0.5">' + timeStr + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="' + s.labelBg + ' px-3 py-1.5 rounded-lg border ' + s.labelBorder + '">' +
+        '<span class="' + s.labelColor + ' font-bold text-[11px] uppercase tracking-wider">' + s.label + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function loadScanHistory() {
+  if (!APP.currentUser) return;
+  callApi('getScanHistory', { operatorName: APP.currentUser.name })
+    .then(function(history) {
+      if (history && history.length > 0) {
+        history.forEach(function(h) {
+          APP.scanHistory.push({
+            code: h.resi || h.pesanan,
+            status: 'success',
+            time: new Date(h.waktu),
+            data: h
+          });
+        });
+        APP.scanCount = APP.scanHistory.length;
+        document.getElementById('scan-count-badge').textContent = APP.scanCount + ' SCAN';
+        renderScanHistory();
+      }
+    });
+}
+
+// ============================================
+// DASHBOARD
+// ============================================
+
+function loadDashboard() {
+  callApi('getDashboardStats')
+    .then(function(stats) {
+      if (stats.error) { showToast('Error: ' + stats.error, 'error'); return; }
+
+      // KPI Cards
+      document.getElementById('kpi-total').textContent = formatNumber(stats.totalPaket);
+      document.getElementById('kpi-pending').textContent = formatNumber(stats.perluDikirim);
+      document.getElementById('kpi-shipped').textContent = formatNumber(stats.sedangDikirim);
+
+      // Bar Chart
+      renderChart(stats.ekspedisiStats);
+
+      // Recent Activity
+      renderRecentActivity(stats.recentScans);
+
+      // Dashboard table
+      renderDashboardTable(stats.recentScans);
+    })
+    .catch(function(err) {
+      showToast('Gagal memuat dashboard.', 'error');
+    });
+}
+
+function renderChart(ekspedisiStats) {
+  const container = document.getElementById('chart-bars');
+  const entries = Object.entries(ekspedisiStats);
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="text-center text-secondary text-sm py-8 w-full">Belum ada data ekspedisi</div>';
+    return;
+  }
+
+  const maxTotal = Math.max(...entries.map(function(e) { return e[1].total; }));
+
+  container.innerHTML = entries.map(function(entry) {
+    const name = entry[0];
+    const data = entry[1];
+    const pct = maxTotal > 0 ? Math.round((data.total / maxTotal) * 100) : 0;
+    const shortName = name.replace('Shopee Xpress', 'SPX').replace('J&T Express', 'J&T').replace('SiCepat', 'SICEPAT').replace('Anteraja', 'ANTERAJA');
+
+    return '<div class="flex-1 flex flex-col items-center group">' +
+      '<div class="w-10 md:w-12 bg-surface-variant rounded-t-lg relative flex flex-col justify-end overflow-hidden h-full">' +
+        '<div class="w-full bg-primary-container rounded-t-lg chart-bar relative" style="height:' + pct + '%">' +
+          '<div class="absolute -top-7 left-0 right-0 text-center text-primary font-bold text-[12px] opacity-0 group-hover:opacity-100 transition-opacity">' + data.total + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<span class="mt-3 text-[10px] md:text-[11px] font-bold text-on-surface-variant uppercase tracking-widest text-center">' + shortName + '</span>' +
+    '</div>';
+  }).join('');
+
+  // Animate bars
+  setTimeout(function() {
+    document.querySelectorAll('.chart-bar').forEach(function(bar) {
+      const h = bar.style.height;
+      bar.style.height = '0%';
+      setTimeout(function() { bar.style.height = h; }, 100);
+    });
+  }, 50);
+}
+
+function renderRecentActivity(scans) {
+  const container = document.getElementById('recent-activity');
+  if (!scans || scans.length === 0) {
+    container.innerHTML = '<div class="text-sm text-secondary">Belum ada aktivitas scan.</div>';
+    return;
+  }
+
+  container.innerHTML = scans.slice(0, 5).map(function(scan) {
+    const dotColor = scan.status === 'Sedang Dikirim' ? 'bg-status-success' : 'bg-status-pending';
+    const shadowColor = scan.status === 'Sedang Dikirim' ? 'rgba(46,125,50,0.1)' : 'rgba(237,108,2,0.1)';
+    const label = scan.status === 'Sedang Dikirim' ? 'Selesai Scan' : 'Menunggu';
+
+    return '<div class="flex gap-4">' +
+      '<div class="w-2.5 h-2.5 mt-1.5 rounded-full ' + dotColor + ' shrink-0 shadow-[0_0_0_3px_' + shadowColor + ']"></div>' +
+      '<div>' +
+        '<p class="text-[14px] font-bold text-on-surface leading-tight">' + label + ': ' + scan.ekspedisi + '</p>' +
+        '<p class="text-[12px] text-on-surface-variant mt-1">Resi: ' + scan.resi + '</p>' +
+        '<span class="text-[10px] font-bold text-on-surface-variant uppercase mt-1 inline-block">' + scan.operator + ' · ' + formatTime(scan.waktu) + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderDashboardTable(scans) {
+  const tbody = document.getElementById('dashboard-table-body');
+  if (!scans || scans.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="px-8 py-8 text-center text-secondary text-sm">Belum ada data.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = scans.map(function(scan) {
+    const statusClass = scan.status === 'Sedang Dikirim'
+      ? 'bg-status-success/10 text-status-success' : 'bg-status-pending/10 text-status-pending';
+    const statusLabel = scan.status === 'Sedang Dikirim' ? 'Selesai Scan' : 'Menunggu';
+
+    return '<tr class="hover:bg-surface-container-low/30 transition-colors">' +
+      '<td class="px-6 md:px-8 py-5 font-mono-data font-bold text-[13px] text-primary">' + scan.resi + '</td>' +
+      '<td class="px-6 md:px-8 py-5 text-[14px] font-medium">' + scan.ekspedisi + '</td>' +
+      '<td class="px-6 md:px-8 py-5 text-[14px] text-on-surface-variant hidden md:table-cell">' + scan.toko + '</td>' +
+      '<td class="px-6 md:px-8 py-5 text-[14px] text-on-surface-variant hidden md:table-cell">' + formatTime(scan.waktu) + '</td>' +
+      '<td class="px-6 md:px-8 py-5 text-right"><span class="px-3 py-1.5 ' + statusClass + ' rounded-lg text-[11px] font-bold uppercase tracking-wider">' + statusLabel + '</span></td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ============================================
+// MASTER DATA
+// ============================================
+
+function loadMasterData() {
+  const filter = document.getElementById('md-filter-input') ? document.getElementById('md-filter-input').value : '';
+
+  callApi('getMasterData', { page: APP.masterPage, pageSize: 10, filter: filter })
+    .then(function(result) {
+      if (result.error) { showToast('Error: ' + result.error, 'error'); return; }
+
+      // Stats
+      callApi('getDashboardStats').then(function(stats) {
+        document.getElementById('md-stat-pending').textContent = formatNumber(stats.perluDikirim);
+        document.getElementById('md-stat-shipped').textContent = formatNumber(stats.sedangDikirim);
+        document.getElementById('md-stat-total').textContent = formatNumber(stats.totalPaket);
+        const eff = stats.totalPaket > 0 ? ((stats.sedangDikirim / stats.totalPaket) * 100).toFixed(1) : 0;
+        document.getElementById('md-stat-efficiency').textContent = eff + '%';
+        document.getElementById('md-efficiency-bar').style.width = eff + '%';
+      });
+
+      // Table
+      document.getElementById('md-total-badge').textContent = result.total + ' TOTAL';
+      renderMasterTable(result.rows);
+      renderMasterPagination(result);
+    })
+    .catch(function(err) {
+      showToast('Gagal memuat data.', 'error');
+    });
+}
+
+function renderMasterTable(rows) {
+  const tbody = document.getElementById('md-table-body');
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-secondary text-sm">Tidak ada data ditemukan.</td></tr>';
+    return;
+  }
+
+  const storeIcons = ['storefront', 'devices', 'inventory', 'child_care', 'pets', 'checkroom'];
+  const storeColors = ['bg-primary/10 text-primary', 'bg-blue-50 text-blue-600', 'bg-green-50 text-green-600', 'bg-pink-50 text-pink-600', 'bg-purple-50 text-purple-600', 'bg-amber-50 text-amber-600'];
+
+  tbody.innerHTML = rows.map(function(row, idx) {
+    const iconIdx = idx % storeIcons.length;
+    const statusClass = row.status === 'Sedang Dikirim'
+      ? 'bg-blue-50 text-blue-700' : 'bg-primary/10 text-primary';
+    const ekspedisiDot = row.status === 'Sedang Dikirim' ? 'bg-green-500' : 'bg-primary animate-pulse';
+
+    return '<tr class="hover:bg-surface-container-low/30 transition-colors">' +
+      '<td class="px-6 py-5"><div class="flex items-center gap-3">' +
+        '<div class="w-10 h-10 rounded-xl ' + storeColors[iconIdx] + ' flex items-center justify-center"><span class="material-symbols-outlined text-xl">' + storeIcons[iconIdx] + '</span></div>' +
+        '<span class="font-semibold text-on-surface text-sm">' + row.namaToko + '</span>' +
+      '</div></td>' +
+      '<td class="px-6 py-5"><span class="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold ' + statusClass + ' uppercase tracking-wide">' + row.status + '</span></td>' +
+      '<td class="px-6 py-5 font-mono-data text-secondary text-sm">' + row.noPesanan + '</td>' +
+      '<td class="px-6 py-5 font-mono-data text-on-surface font-bold text-sm">' + row.noResi + '</td>' +
+      '<td class="px-6 py-5 hidden md:table-cell"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full ' + ekspedisiDot + '"></div><span class="text-sm font-medium">' + row.ekspedisi + '</span></div></td>' +
+      '<td class="px-6 py-5 text-sm text-secondary hidden md:table-cell">' + row.waktuScan + '</td>' +
+      '<td class="px-6 py-5 text-right hidden md:table-cell"><span class="text-sm font-semibold text-on-surface">' + row.namaOperator + '</span></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function renderMasterPagination(result) {
+  const info = document.getElementById('md-pagination-info');
+  const controls = document.getElementById('md-pagination-controls');
+  const start = (result.page - 1) * 10 + 1;
+  const end = Math.min(result.page * 10, result.total);
+  info.textContent = 'Showing ' + start + '-' + end + ' of ' + result.total + ' entries';
+
+  let html = '<button class="w-10 h-10 flex items-center justify-center rounded-xl border border-border-subtle hover:bg-surface-container-low transition-colors disabled:opacity-30" onclick="goToMasterPage(' + (result.page - 1) + ')"' + (result.page <= 1 ? ' disabled' : '') + '><span class="material-symbols-outlined text-xl">chevron_left</span></button>';
+
+  for (let i = 1; i <= Math.min(result.totalPages, 5); i++) {
+    if (i === result.page) {
+      html += '<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20">' + i + '</button>';
+    } else {
+      html += '<button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-container-low text-secondary text-sm font-semibold transition-colors" onclick="goToMasterPage(' + i + ')">' + i + '</button>';
+    }
+  }
+
+  html += '<button class="w-10 h-10 flex items-center justify-center rounded-xl border border-border-subtle hover:bg-surface-container-low transition-colors disabled:opacity-30" onclick="goToMasterPage(' + (result.page + 1) + ')"' + (result.page >= result.totalPages ? ' disabled' : '') + '><span class="material-symbols-outlined text-xl">chevron_right</span></button>';
+
+  controls.innerHTML = html;
+}
+
+function goToMasterPage(page) {
+  if (page < 1) return;
+  APP.masterPage = page;
+  loadMasterData();
+}
+
+function handleMasterFilter() {
+  clearTimeout(APP.masterFilterTimer);
+  APP.masterFilterTimer = setTimeout(function() {
+    APP.masterPage = 1;
+    loadMasterData();
+  }, 500);
+}
+
+function handleAdminSearch(value) {
+  // Redirect to master data view with filter
+  if (value.length >= 2) {
+    switchAdminView('master-data');
+    document.getElementById('md-filter-input').value = value;
+    APP.masterPage = 1;
+    loadMasterData();
+  }
+}
+
+// ============================================
+// UPLOAD EXCEL
+// ============================================
+
+function loadStoreDropdown() {
+  callApi('getStoreList')
+    .then(function(stores) {
+      const select = document.getElementById('upload-store-select');
+      select.innerHTML = '<option value="">-- Pilih Toko --</option>';
+      if (Array.isArray(stores)) {
+        stores.forEach(function(store) {
+          select.innerHTML += '<option value="' + store + '">' + store + '</option>';
+        });
+      }
+    });
+}
+
+function handleFileSelect(input) {
+  if (input.files.length > 0) {
+    const file = input.files[0];
+    document.getElementById('upload-file-label').textContent = file.name;
+    document.getElementById('upload-submit-btn').disabled = false;
+
+    // Parse with SheetJS
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.SheetNames[0];
+        APP.uploadedData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+        showToast(APP.uploadedData.length + ' baris data terdeteksi.', 'info');
+      } catch (err) {
+        showToast('Gagal membaca file Excel.', 'error');
+        APP.uploadedData = null;
+        document.getElementById('upload-submit-btn').disabled = true;
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+function handleUpload() {
+  const store = document.getElementById('upload-store-select').value;
+  if (!store) { showToast('Pilih toko terlebih dahulu!', 'error'); return; }
+  if (!APP.uploadedData) { showToast('Pilih file Excel terlebih dahulu!', 'error'); return; }
+
+  showLoading('Mengupload ' + APP.uploadedData.length + ' data...');
+
+  callApi('uploadExcelData', { jsonData: APP.uploadedData, storeName: store })
+    .then(function(result) {
+      hideLoading();
+      if (result.success) {
+        showToast(result.message, 'success');
+        closeModal('modal-upload');
+        loadMasterData();
+        // Reset
+        APP.uploadedData = null;
+        document.getElementById('upload-file-input').value = '';
+        document.getElementById('upload-file-label').textContent = 'Klik untuk memilih file atau drag & drop';
+        document.getElementById('upload-submit-btn').disabled = true;
+      } else {
+        showToast(result.message, 'error');
+      }
+    })
+    .catch(function(err) {
+      hideLoading();
+      showToast('Upload gagal: ' + (err.message || 'Error'), 'error');
+    });
+}
+
+// ============================================
+// ADD STORE
+// ============================================
+
+function handleAddStore() {
+  const name = document.getElementById('new-store-name').value.trim();
+  if (!name) { showToast('Nama toko tidak boleh kosong!', 'error'); return; }
+
+  callApi('addNewStore', { storeName: name })
+    .then(function(result) {
+      if (result.success) {
+        showToast(result.message, 'success');
+        closeModal('modal-add-store');
+        document.getElementById('new-store-name').value = '';
+        loadStoreDropdown();
+      } else {
+        showToast(result.message, 'error');
+      }
+    })
+    .catch(function(err) {
+      showToast('Gagal: ' + (err.message || 'Error'), 'error');
+    });
+}
+
+// ============================================
+// UI HELPERS
+// ============================================
+
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function showToast(message, type) {
+  const container = document.getElementById('toast-container');
+  const colors = {
+    success: 'bg-status-success',
+    error: 'bg-status-error',
+    info: 'bg-inverse-surface',
+    warning: 'bg-status-pending'
+  };
+  const icons = {
+    success: 'check_circle',
+    error: 'error',
+    info: 'info',
+    warning: 'warning'
+  };
+
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + (colors[type] || colors.info) + ' text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 mb-3';
+  toast.innerHTML = '<span class="material-symbols-outlined text-xl" style="font-variation-settings:\'FILL\' 1;">' + (icons[type] || icons.info) + '</span><span class="text-sm font-medium flex-1">' + message + '</span>';
+
+  container.appendChild(toast);
+  setTimeout(function() { toast.classList.add('show'); }, 50);
+  setTimeout(function() {
+    toast.classList.remove('show');
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 3500);
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Memproses...';
+  document.getElementById('loading-overlay').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').style.display = 'none';
+}
+
+function shakeElement(el) {
+  el.style.animation = 'none';
+  el.offsetHeight; // trigger reflow
+  el.style.animation = 'shake 0.4s ease';
+  setTimeout(function() { el.style.animation = ''; }, 400);
+}
+
+function formatNumber(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function formatTime(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+  } catch(e) { return dateStr; }
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = Math.floor((now - new Date(date)) / 1000);
+  if (diff < 60) return 'Baru saja';
+  if (diff < 3600) return Math.floor(diff / 60) + ' menit yang lalu';
+  if (diff < 86400) return Math.floor(diff / 3600) + ' jam yang lalu';
+  return Math.floor(diff / 86400) + ' hari yang lalu';
+}
+
+// ============================================
+// AUDIO FEEDBACK
+// ============================================
+
+function playSuccess() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = 880;
+    gain.gain.value = 0.3;
+    osc.start(); osc.stop(ctx.currentTime + 0.15);
+    setTimeout(function() {
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2); gain2.connect(ctx.destination);
+      osc2.type = 'sine'; osc2.frequency.value = 1320;
+      gain2.gain.value = 0.3;
+      osc2.start(); osc2.stop(ctx.currentTime + 0.2);
+    }, 150);
+  } catch(e) {}
+}
+
+function playBuzzer() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'square'; osc.frequency.value = 200;
+    gain.gain.value = 0.2;
+    osc.start(); osc.stop(ctx.currentTime + 0.4);
+  } catch(e) {}
+}
+
+// ============================================
+// KEYBOARD SUPPORT
+// ============================================
+
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('page-login').classList.contains('active')) {
+    if (e.key >= '0' && e.key <= '9') addPin(e.key);
+    if (e.key === 'Backspace') clearPin();
+    if (e.key === 'Enter') submitLogin();
+  }
+});
+
+// Shake animation keyframes
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = '@keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }';
+document.head.appendChild(shakeStyle);
+
+</script>
+</body>
+</html>

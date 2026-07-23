@@ -81,9 +81,9 @@ tailwind.config = {
   body { font-family: 'Inter', sans-serif; }
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; line-height: 1; text-transform: none; letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr; vertical-align: middle; }
 
-  /* Page visibility */
+  /* Page visibility & scrolling */
   .page { display: none; }
-  .page.active { display: flex; }
+  .page.active { display: flex; flex-direction: column; width: 100%; min-height: 100vh; min-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   /* Admin sub-views */
   .admin-view { display: none; }
@@ -717,35 +717,39 @@ const APP = {
 // ============================================
 
 function applyRolePermissions() {
-  const isOperator = APP.currentUser && APP.currentUser.role !== 'Admin';
+  const isAdmin = APP.currentUser && APP.currentUser.role === 'Admin';
 
-  // 1. Hide Dashboard links/tabs
+  // 1. Hide Dashboard links/tabs for Non-Admin
   const navDash = document.getElementById('nav-dashboard-tab');
   const sideDash = document.getElementById('sidebar-dashboard-link');
-  if (navDash) navDash.style.display = isOperator ? 'none' : 'flex';
-  if (sideDash) sideDash.style.display = isOperator ? 'none' : 'flex';
+  if (navDash) navDash.style.setProperty('display', isAdmin ? 'flex' : 'none', 'important');
+  if (sideDash) sideDash.style.setProperty('display', isAdmin ? 'flex' : 'none', 'important');
 
-  // 2. Hide all Admin-Only buttons (Tambah Toko, Upload Excel, etc.)
+  // 2. Hide ALL Admin-Only buttons (Tambah Toko, Upload Excel, etc.)
   document.querySelectorAll('.admin-only').forEach(el => {
-    el.style.display = isOperator ? 'none' : '';
+    if (isAdmin) {
+      el.classList.remove('hidden');
+      el.style.setProperty('display', '', 'important');
+    } else {
+      el.classList.add('hidden');
+      el.style.setProperty('display', 'none', 'important');
+    }
   });
 
-  // 3. Hide Sidebar drawer & Mobile menu button for Operators
+  // 3. Hide Sidebar drawer & Mobile menu button for Non-Admin
   const drawer = document.getElementById('sidebar-drawer');
   const menuBtn = document.getElementById('mobile-menu-btn');
   if (drawer) {
-    if (isOperator) drawer.style.display = 'none';
-    else drawer.style.display = '';
+    drawer.style.setProperty('display', isAdmin ? '' : 'none', 'important');
   }
   if (menuBtn) {
-    if (isOperator) menuBtn.style.display = 'none';
-    else menuBtn.style.display = '';
+    menuBtn.style.setProperty('display', isAdmin ? '' : 'none', 'important');
   }
 
-  // 4. Remove sidebar left margin for Operators
+  // 4. Remove sidebar left margin for Non-Admin
   const mainElem = document.querySelector('#page-admin main');
   if (mainElem) {
-    if (isOperator) {
+    if (!isAdmin) {
       mainElem.classList.remove('md:ml-64');
     } else {
       mainElem.classList.add('md:ml-64');
@@ -1615,6 +1619,11 @@ function handleAddStore() {
 // ============================================
 
 function openModal(id) {
+  const isAdmin = APP.currentUser && APP.currentUser.role === 'Admin';
+  if ((id === 'modal-upload' || id === 'modal-add-store') && !isAdmin) {
+    showToast('Akses ditolak: Fitur ini khusus untuk Admin Master!', 'error');
+    return;
+  }
   document.getElementById(id).classList.add('active');
 }
 

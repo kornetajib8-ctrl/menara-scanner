@@ -136,7 +136,7 @@ tailwind.config = {
   #reader img { display: none !important; }
 </style>
 </head>
-<body class="bg-background text-on-surface min-h-screen overflow-hidden">
+<body class="bg-background text-on-surface min-h-screen overflow-y-auto">
 
 <!-- ============================================ -->
 <!-- TOAST NOTIFICATION -->
@@ -722,31 +722,29 @@ function applyRolePermissions() {
   // 1. Hide Dashboard links/tabs for Non-Admin
   const navDash = document.getElementById('nav-dashboard-tab');
   const sideDash = document.getElementById('sidebar-dashboard-link');
-  if (navDash) navDash.style.setProperty('display', isAdmin ? 'flex' : 'none', 'important');
-  if (sideDash) sideDash.style.setProperty('display', isAdmin ? 'flex' : 'none', 'important');
+  if (navDash) navDash.classList.toggle('hidden', !isAdmin);
+  if (sideDash) sideDash.classList.toggle('hidden', !isAdmin);
 
-  // 2. Hide ALL Admin-Only buttons (Tambah Toko, Upload Excel, etc.)
+  // 2. Hide ALL Admin-Only elements for Non-Admin
   document.querySelectorAll('.admin-only').forEach(el => {
-    if (isAdmin) {
-      el.classList.remove('hidden');
-      el.style.setProperty('display', '', 'important');
-    } else {
-      el.classList.add('hidden');
-      el.style.setProperty('display', 'none', 'important');
-    }
+    el.classList.toggle('hidden', !isAdmin);
   });
 
-  // 3. Hide Sidebar drawer & Mobile menu button for Non-Admin
-  const drawer = document.getElementById('sidebar-drawer');
+  // 3. Mobile Hamburger Menu Button: Clean inline style so Tailwind md:hidden works
   const menuBtn = document.getElementById('mobile-menu-btn');
-  if (drawer) {
-    drawer.style.setProperty('display', isAdmin ? '' : 'none', 'important');
-  }
   if (menuBtn) {
-    menuBtn.style.setProperty('display', isAdmin ? '' : 'none', 'important');
+    menuBtn.style.display = '';
+    menuBtn.classList.toggle('hidden', !isAdmin);
   }
 
-  // 4. Remove sidebar left margin for Non-Admin
+  // 4. Sidebar Drawer: Clean inline style
+  const drawer = document.getElementById('sidebar-drawer');
+  if (drawer) {
+    drawer.style.display = '';
+    drawer.classList.toggle('hidden', !isAdmin);
+  }
+
+  // 5. Remove sidebar left margin for Non-Admin
   const mainElem = document.querySelector('#page-admin main');
   if (mainElem) {
     if (!isAdmin) {

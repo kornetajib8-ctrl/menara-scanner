@@ -383,13 +383,13 @@ tailwind.config = {
     <header class="sticky top-0 z-30 bg-white border-b border-border-subtle h-16 shrink-0">
       <div class="flex justify-between items-center w-full px-4 sm:px-6 max-w-container-max mx-auto h-full gap-2">
         <div class="flex items-center gap-3 min-w-0">
-          <button class="md:hidden p-2 text-on-surface hover:bg-surface-container-low rounded-xl transition-colors shrink-0" onclick="toggleMobileSidebar(true)">
+          <button id="mobile-menu-btn" class="md:hidden p-2 text-on-surface hover:bg-surface-container-low rounded-xl transition-colors shrink-0" onclick="toggleMobileSidebar(true)">
             <span class="material-symbols-outlined text-2xl">menu</span>
           </button>
           <h2 class="font-headline-lg text-on-surface text-base sm:text-lg font-bold truncate" id="admin-page-title">Dashboard Rekapitulasi</h2>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border-subtle hover:bg-surface-container-low rounded-xl text-xs font-bold transition-all text-on-surface shadow-sm" onclick="openModal('modal-add-store')">
+          <button class="admin-only flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border-subtle hover:bg-surface-container-low rounded-xl text-xs font-bold transition-all text-on-surface shadow-sm" onclick="openModal('modal-add-store')">
             <span class="material-symbols-outlined text-base">store</span>
             <span class="hidden sm:inline">Tambah Toko</span>
           </button>
@@ -407,7 +407,7 @@ tailwind.config = {
     <!-- ==================== -->
     <!-- VIEW: Dashboard -->
     <!-- ==================== -->
-    <div id="view-dashboard" class="admin-view active p-4 sm:p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
+    <div id="view-dashboard" class="admin-view active p-4 sm:p-6 md:p-8 pb-28 max-w-container-max mx-auto w-full flex-1">
       <!-- KPI Cards -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div class="bg-white p-5 rounded-xl shadow-soft border border-border-subtle hover:border-primary/30 transition-all">
@@ -522,22 +522,22 @@ tailwind.config = {
     <!-- ==================== -->
     <!-- VIEW: Master Data -->
     <!-- ==================== -->
-    <div id="view-master-data" class="admin-view p-4 sm:p-6 md:p-8 max-w-container-max mx-auto w-full flex-1">
+    <div id="view-master-data" class="admin-view p-4 sm:p-6 md:p-8 pb-28 max-w-container-max mx-auto w-full flex-1">
       <!-- Header Actions -->
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 gap-4">
         <div>
           <nav class="flex text-xs text-secondary mb-2 gap-2">
-            <span class="hover:text-primary cursor-pointer" onclick="switchAdminView('dashboard')">Dashboard</span>
-            <span>/</span>
+            <span class="admin-only hover:text-primary cursor-pointer" onclick="switchAdminView('dashboard')">Dashboard</span>
+            <span class="admin-only">/</span>
             <span class="text-on-surface font-semibold">Master Data</span>
           </nav>
           <p class="text-secondary font-body-sm text-xs sm:text-sm">Manage orders and logistics data in real-time.</p>
         </div>
         <div class="flex items-center gap-2.5">
-          <button class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-white border border-border-subtle text-on-surface font-semibold text-xs sm:text-sm rounded-xl hover:bg-surface-container-low transition-colors shadow-sm" onclick="openModal('modal-add-store')">
+          <button class="admin-only flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-white border border-border-subtle text-on-surface font-semibold text-xs sm:text-sm rounded-xl hover:bg-surface-container-low transition-colors shadow-sm" onclick="openModal('modal-add-store')">
             <span class="material-symbols-outlined mr-1.5 text-base sm:text-lg">store</span>Tambah Toko
           </button>
-          <button class="flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-6 py-2.5 bg-primary text-white font-semibold text-xs sm:text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-primary/20" onclick="openModal('modal-upload')">
+          <button class="admin-only flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-6 py-2.5 bg-primary text-white font-semibold text-xs sm:text-sm rounded-xl hover:brightness-110 transition-all shadow-lg shadow-primary/20" onclick="openModal('modal-upload')">
             <span class="material-symbols-outlined mr-1.5 text-base sm:text-lg">upload_file</span>Upload Excel
           </button>
         </div>
@@ -719,11 +719,38 @@ const APP = {
 function applyRolePermissions() {
   const isOperator = APP.currentUser && APP.currentUser.role !== 'Admin';
 
+  // 1. Hide Dashboard links/tabs
   const navDash = document.getElementById('nav-dashboard-tab');
   const sideDash = document.getElementById('sidebar-dashboard-link');
-
   if (navDash) navDash.style.display = isOperator ? 'none' : 'flex';
   if (sideDash) sideDash.style.display = isOperator ? 'none' : 'flex';
+
+  // 2. Hide all Admin-Only buttons (Tambah Toko, Upload Excel, etc.)
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = isOperator ? 'none' : '';
+  });
+
+  // 3. Hide Sidebar drawer & Mobile menu button for Operators
+  const drawer = document.getElementById('sidebar-drawer');
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  if (drawer) {
+    if (isOperator) drawer.style.display = 'none';
+    else drawer.style.display = '';
+  }
+  if (menuBtn) {
+    if (isOperator) menuBtn.style.display = 'none';
+    else menuBtn.style.display = '';
+  }
+
+  // 4. Remove sidebar left margin for Operators
+  const mainElem = document.querySelector('#page-admin main');
+  if (mainElem) {
+    if (isOperator) {
+      mainElem.classList.remove('md:ml-64');
+    } else {
+      mainElem.classList.add('md:ml-64');
+    }
+  }
 }
 
 function navigateTo(page) {

@@ -978,11 +978,13 @@ function initHtml5Qrcode() {
 
 function startCameraWithId(cameraId) {
   const config = {
-    fps: 10,
+    fps: 15,
     qrbox: function(w, h) {
-      return { width: Math.floor(w * 0.8), height: Math.floor(h * 0.6) };
+      return { width: Math.floor(w * 0.85), height: Math.floor(h * 0.45) };
     },
-    aspectRatio: 1.0
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
   };
 
   APP.scanner.start(
@@ -1002,11 +1004,13 @@ function startCameraWithId(cameraId) {
 
 function startCameraWithConstraint(constraint) {
   const config = {
-    fps: 10,
+    fps: 15,
     qrbox: function(w, h) {
-      return { width: Math.floor(w * 0.8), height: Math.floor(h * 0.6) };
+      return { width: Math.floor(w * 0.85), height: Math.floor(h * 0.45) };
     },
-    aspectRatio: 1.0
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
   };
 
   resetScannerInstance();

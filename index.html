@@ -78,12 +78,33 @@ tailwind.config = {
 };
 </script>
 <style>
-  body { font-family: 'Inter', sans-serif; }
+  html, body {
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    font-family: 'Inter', sans-serif;
+  }
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; line-height: 1; text-transform: none; letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr; vertical-align: middle; }
 
-  /* Page visibility & scrolling */
-  .page { display: none; }
-  .page.active { display: flex; flex-direction: column; width: 100%; min-height: 100vh; min-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  /* Page visibility & natural document scrolling */
+  .page { display: none !important; }
+  .page.active {
+    display: block !important;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-y: visible !important;
+  }
+
+  /* Fixed camera container for scanner page only */
+  #page-scanner.active {
+    display: flex !important;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden !important;
+  }
 
   /* Admin sub-views */
   .admin-view { display: none; }
@@ -801,6 +822,7 @@ function toggleMobileSidebar(show) {
   }
 
   if (show) {
+    drawer.classList.remove('hidden');
     drawer.classList.remove('-translate-x-full');
     backdrop.classList.remove('hidden');
   } else {

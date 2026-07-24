@@ -1418,9 +1418,6 @@
     function startCameraWithId(cameraId) {
       const config = {
         fps: 30,
-        qrbox: function (w, h) {
-          return { width: Math.floor(w * 0.95), height: Math.floor(h * 0.60) };
-        },
         formatsToSupport: [
           Html5QrcodeSupportedFormats.CODE_128,
           Html5QrcodeSupportedFormats.CODE_39,
@@ -1452,9 +1449,6 @@
     function startCameraWithConstraint(constraint) {
       const config = {
         fps: 30,
-        qrbox: function (w, h) {
-          return { width: Math.floor(w * 0.95), height: Math.floor(h * 0.60) };
-        },
         formatsToSupport: [
           Html5QrcodeSupportedFormats.CODE_128,
           Html5QrcodeSupportedFormats.CODE_39,

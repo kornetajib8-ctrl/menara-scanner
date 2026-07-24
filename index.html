@@ -1417,10 +1417,18 @@
 
     function startCameraWithId(cameraId) {
       const config = {
-        fps: 15,
+        fps: 30,
         qrbox: function (w, h) {
-          return { width: Math.floor(w * 0.85), height: Math.floor(h * 0.45) };
+          return { width: Math.floor(w * 0.95), height: Math.floor(h * 0.60) };
         },
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.UPC_A
+        ],
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true
         }
@@ -1443,10 +1451,18 @@
 
     function startCameraWithConstraint(constraint) {
       const config = {
-        fps: 15,
+        fps: 30,
         qrbox: function (w, h) {
-          return { width: Math.floor(w * 0.85), height: Math.floor(h * 0.45) };
+          return { width: Math.floor(w * 0.95), height: Math.floor(h * 0.60) };
         },
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.UPC_A
+        ],
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true
         }

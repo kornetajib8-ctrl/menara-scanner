@@ -1192,14 +1192,11 @@
           else if (action === 'uploadExcelData') run.uploadExcelData(JSON.stringify(params.jsonData), params.storeName);
           else reject(new Error('Unknown action: ' + action));
         } else {
-          const url = new URL(APPS_SCRIPT_API_URL);
-          url.searchParams.append('action', action);
-          Object.keys(params).forEach(k => {
-            if (typeof params[k] === 'object') url.searchParams.append(k, JSON.stringify(params[k]));
-            else url.searchParams.append(k, params[k]);
-          });
-
-          fetch(url.toString())
+          const payload = { action: action, ...params };
+          fetch(APPS_SCRIPT_API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          })
             .then(res => res.json())
             .then(resolve)
             .catch(reject);

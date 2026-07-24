@@ -879,14 +879,14 @@ function callApi(action, params = {}) {
       else if (action === 'uploadExcelData') run.uploadExcelData(JSON.stringify(params.jsonData), params.storeName);
       else reject(new Error('Unknown action: ' + action));
     } else {
-      const url = new URL(APPS_SCRIPT_API_URL);
-      url.searchParams.append('action', action);
-      Object.keys(params).forEach(k => {
-        if (typeof params[k] === 'object') url.searchParams.append(k, JSON.stringify(params[k]));
-        else url.searchParams.append(k, params[k]);
-      });
-
-      fetch(url.toString())
+      // POST dengan body (bukan GET + query string) supaya tidak kena batas panjang URL
+      // saat data upload besar. Content-Type text/plain menghindari CORS preflight (OPTIONS)
+      // yang tidak didukung oleh Apps Script web app.
+      fetch(APPS_SCRIPT_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: action, ...params })
+      })
         .then(res => res.json())
         .then(resolve)
         .catch(reject);

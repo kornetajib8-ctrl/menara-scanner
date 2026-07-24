@@ -903,9 +903,13 @@
                 id="md-total-badge">0 TOTAL</span>
             </div>
             <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap justify-end">
-              <input type="date" id="md-filter-date" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()" title="Filter Tanggal" />
-              <select id="md-filter-store" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()">
-                 <option value="">Semua Toko</option>
+              <input type="date" id="md-filter-date"
+                class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all"
+                onchange="loadMasterData()" title="Filter Tanggal" />
+              <select id="md-filter-store"
+                class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all"
+                onchange="loadMasterData()">
+                <option value="">Semua Toko</option>
               </select>
               <div class="relative flex-1 sm:w-64 min-w-[200px]">
                 <span
@@ -1418,6 +1422,9 @@
     function startCameraWithId(cameraId) {
       const config = {
         fps: 30,
+        qrbox: function (w, h) {
+          return { width: w, height: h };
+        },
         formatsToSupport: [
           Html5QrcodeSupportedFormats.CODE_128,
           Html5QrcodeSupportedFormats.CODE_39,
@@ -1449,6 +1456,9 @@
     function startCameraWithConstraint(constraint) {
       const config = {
         fps: 30,
+        qrbox: function (w, h) {
+          return { width: w, height: h };
+        },
         formatsToSupport: [
           Html5QrcodeSupportedFormats.CODE_128,
           Html5QrcodeSupportedFormats.CODE_39,
@@ -1752,7 +1762,7 @@
         const name = entry[0];
         const data = entry[1];
         const pct = maxTotal > 0 ? Math.round((data.total / maxTotal) * 100) : 0;
-        
+
         // Extract simple name if it's too long (e.g. REGULER (CASHLESS)-ANTERAJA REGULER -> ANTERAJA REGULER)
         let shortName = name;
         if (name.includes('-')) {
@@ -1951,7 +1961,7 @@
               });
             }
           }
-          
+
           const filterSelect = document.getElementById('md-filter-store');
           if (filterSelect) {
             filterSelect.innerHTML = '<option value="">Semua Toko</option>';

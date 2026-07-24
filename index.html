@@ -884,8 +884,13 @@
               <span class="bg-surface-container-low text-secondary text-xs px-3 py-1 rounded-full font-bold"
                 id="md-total-badge">0 TOTAL</span>
             </div>
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-              <div class="relative flex-1 sm:w-72">
+            <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap justify-end">
+              <input type="date" id="md-filter-date" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()" title="Filter Tanggal" />
+              <input type="month" id="md-filter-month" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()" title="Filter Bulan" />
+              <select id="md-filter-store" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()">
+                 <option value="">Semua Toko</option>
+              </select>
+              <div class="relative flex-1 sm:w-64 min-w-[200px]">
                 <span
                   class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-lg">filter_alt</span>
                 <input
@@ -1187,6 +1192,7 @@
           else if (action === 'getDashboardStats') run.getDashboardStats();
           else if (action === 'getMasterData') run.getMasterData(params.page, params.pageSize, params.filter);
           else if (action === 'getStoreList') run.getStoreList();
+          else if (action === 'processRetur') run.processRetur(params.code, params.operatorName);
           else if (action === 'addNewStore') run.addNewStore(params.storeName);
           else if (action === 'getScanHistory') run.getScanHistory(params.operatorName);
           else if (action === 'uploadExcelData') run.uploadExcelData(JSON.stringify(params.jsonData), params.storeName);
@@ -1543,11 +1549,29 @@
       </div>
       <button class="w-full py-3 bg-status-success text-white rounded-xl font-semibold text-sm" onclick="closeModal('modal-scan-result')">Lanjut Scan</button>
     `;
-      } else {
+      } else if (result.isReturPrompt) {
+        playBuzzer(); // Play warning sound for prompt
+        addToScanHistory({ code: code, status: 'duplicate', time: new Date(), data: result });
+        content.innerHTML = `
+        <div class="w-16 h-16 rounded-full bg-status-pending/10 flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-status-pending text-4xl">warning</span>
+        </div>
+        <h3 class="text-xl font-bold text-on-surface mb-1">Sudah Dikirim</h3>
+        <p class="text-secondary text-sm mb-4">${result.message}</p>
+        <div class="bg-surface-container-low rounded-xl p-4 text-left space-y-2 mb-6">
+          <div class="flex justify-between"><span class="text-xs text-secondary">No. Pesanan</span><span class="text-xs font-mono-data font-bold">${result.order || '-'}</span></div>
+          <div class="flex justify-between"><span class="text-xs text-secondary">Operator Scan</span><span class="text-xs font-bold">${result.operator || '-'}</span></div>
+          <div class="flex justify-between"><span class="text-xs text-secondary">Waktu Scan</span><span class="text-xs font-bold">${result.waktu || '-'}</span></div>
+        </div>
+        <div class="flex gap-3">
+          <button class="flex-1 py-3 border border-border-subtle rounded-xl font-semibold text-sm hover:bg-surface-container-low transition-colors" onclick="closeModal('modal-scan-result')">Batal</button>
+          <button class="flex-1 py-3 bg-status-pending text-white rounded-xl font-semibold text-sm hover:brightness-110 transition-all" onclick="confirmRetur('${code}')">Ya, Retur</button>
+        </div>
+      `;
+      } else if (result.alreadyScanned) {
         playBuzzer();
-        if (result.alreadyScanned) {
-          addToScanHistory({ code: code, status: 'duplicate', time: new Date(), data: result });
-          content.innerHTML = `
+        addToScanHistory({ code: code, status: 'duplicate', time: new Date(), data: result });
+        content.innerHTML = `
         <div class="w-16 h-16 rounded-full bg-status-pending/10 flex items-center justify-center mx-auto mb-4">
           <span class="material-symbols-outlined text-status-pending text-4xl">warning</span>
         </div>
@@ -1560,9 +1584,10 @@
         </div>
         <button class="w-full py-3 bg-status-pending text-white rounded-xl font-semibold text-sm" onclick="closeModal('modal-scan-result')">OK, Lanjut</button>
       `;
-        } else {
-          addToScanHistory({ code: code, status: 'error', time: new Date(), data: result });
-          content.innerHTML = `
+      } else {
+        playBuzzer();
+        addToScanHistory({ code: code, status: 'error', time: new Date(), data: result });
+        content.innerHTML = `
         <div class="w-16 h-16 rounded-full bg-status-error/10 flex items-center justify-center mx-auto mb-4">
           <span class="material-symbols-outlined text-status-error text-4xl">error</span>
         </div>
@@ -1571,10 +1596,30 @@
         <p class="text-xs font-mono-data text-secondary mb-6 bg-surface-container-low rounded-lg p-3">Kode: ${code}</p>
         <button class="w-full py-3 bg-status-error text-white rounded-xl font-semibold text-sm" onclick="closeModal('modal-scan-result')">Coba Lagi</button>
       `;
-        }
       }
 
       openModal('modal-scan-result');
+    }
+
+    function confirmRetur(code) {
+      closeModal('modal-scan-result');
+      showLoading('Memproses retur...');
+      callApi('processRetur', { code: code, operatorName: APP.currentUser ? APP.currentUser.name : 'Unknown' })
+        .then(function (res) {
+          hideLoading();
+          if (res.success) {
+            playSuccess();
+            showToast('Paket berhasil diretur!', 'success');
+          } else {
+            playBuzzer();
+            showToast(res.message, 'error');
+          }
+        })
+        .catch(function (err) {
+          hideLoading();
+          playBuzzer();
+          showToast('Error koneksi: ' + err.message, 'error');
+        });
     }
 
     function addToScanHistory(item) {
@@ -1752,8 +1797,11 @@
 
     function loadMasterData() {
       const filter = document.getElementById('md-filter-input') ? document.getElementById('md-filter-input').value : '';
+      const filterDate = document.getElementById('md-filter-date') ? document.getElementById('md-filter-date').value : '';
+      const filterMonth = document.getElementById('md-filter-month') ? document.getElementById('md-filter-month').value : '';
+      const filterStore = document.getElementById('md-filter-store') ? document.getElementById('md-filter-store').value : '';
 
-      callApi('getMasterData', { page: APP.masterPage, pageSize: 10, filter: filter })
+      callApi('getMasterData', { page: APP.masterPage, pageSize: 10, filter: filter, filterDate: filterDate, filterMonth: filterMonth, filterStore: filterStore })
         .then(function (result) {
           if (result.error) { showToast('Error: ' + result.error, 'error'); return; }
 
@@ -1862,13 +1910,26 @@
       callApi('getStoreList')
         .then(function (stores) {
           const select = document.getElementById('upload-store-select');
-          select.innerHTML = '<option value="">-- Pilih Toko --</option>';
-          if (Array.isArray(stores)) {
-            stores.forEach(function (store) {
-              select.innerHTML += '<option value="' + store + '">' + store + '</option>';
-            });
+          if (select) {
+            select.innerHTML = '<option value="">-- Pilih Toko --</option>';
+            if (Array.isArray(stores)) {
+              stores.forEach(function (store) {
+                select.innerHTML += '<option value="' + store + '">' + store + '</option>';
+              });
+            }
           }
-        });
+          
+          const filterSelect = document.getElementById('md-filter-store');
+          if (filterSelect) {
+            filterSelect.innerHTML = '<option value="">Semua Toko</option>';
+            if (Array.isArray(stores)) {
+              stores.forEach(function (store) {
+                filterSelect.innerHTML += '<option value="' + store + '">' + store + '</option>';
+              });
+            }
+          }
+        })
+        .catch(console.error);
     }
 
     function handleFileSelect(input) {

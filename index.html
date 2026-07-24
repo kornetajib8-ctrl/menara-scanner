@@ -745,8 +745,10 @@
                 <p class="text-[13px] text-on-surface-variant mt-1">Volume pengiriman per layanan ekspedisi</p>
               </div>
             </div>
-            <div class="h-52 md:h-64 flex items-end justify-around gap-4 md:gap-8 pb-4" id="chart-bars">
-              <div class="text-center text-secondary text-sm py-8 w-full">Memuat data...</div>
+            <div class="overflow-x-auto pb-4 custom-scrollbar">
+              <div class="h-52 md:h-64 flex items-end justify-start gap-4 md:gap-8 min-w-max px-2" id="chart-bars">
+                <div class="text-center text-secondary text-sm py-8 w-full">Memuat data...</div>
+              </div>
             </div>
           </div>
           <!-- Recent Activity -->
@@ -1748,7 +1750,7 @@
         }
         shortName = shortName.replace('Shopee Xpress', 'SPX').replace('J&T Express', 'J&T').replace('SiCepat', 'SICEPAT').replace('Anteraja', 'ANTERAJA');
 
-        return '<div class="flex-1 flex flex-col items-center group">' +
+        return '<div class="flex-1 flex flex-col items-center group min-w-[60px] md:min-w-[80px]">' +
           '<div class="w-10 md:w-12 bg-surface-variant rounded-t-lg relative flex flex-col justify-end overflow-hidden h-full">' +
           '<div class="w-full bg-primary-container rounded-t-lg chart-bar relative" style="height:' + pct + '%">' +
           '<div class="absolute -top-7 left-0 right-0 text-center text-primary font-bold text-[12px] opacity-0 group-hover:opacity-100 transition-opacity">' + data.total + '</div>' +

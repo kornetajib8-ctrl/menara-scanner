@@ -886,7 +886,6 @@
             </div>
             <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap justify-end">
               <input type="date" id="md-filter-date" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()" title="Filter Tanggal" />
-              <input type="month" id="md-filter-month" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()" title="Filter Bulan" />
               <select id="md-filter-store" class="px-3 py-2.5 bg-surface-container-low border-transparent border rounded-xl text-sm focus:ring-0 focus:border-primary/20 outline-none transition-all" onchange="loadMasterData()">
                  <option value="">Semua Toko</option>
               </select>
@@ -1798,10 +1797,9 @@
     function loadMasterData() {
       const filter = document.getElementById('md-filter-input') ? document.getElementById('md-filter-input').value : '';
       const filterDate = document.getElementById('md-filter-date') ? document.getElementById('md-filter-date').value : '';
-      const filterMonth = document.getElementById('md-filter-month') ? document.getElementById('md-filter-month').value : '';
       const filterStore = document.getElementById('md-filter-store') ? document.getElementById('md-filter-store').value : '';
 
-      callApi('getMasterData', { page: APP.masterPage, pageSize: 10, filter: filter, filterDate: filterDate, filterMonth: filterMonth, filterStore: filterStore })
+      callApi('getMasterData', { page: APP.masterPage, pageSize: 10, filter: filter, filterDate: filterDate, filterStore: filterStore })
         .then(function (result) {
           if (result.error) { showToast('Error: ' + result.error, 'error'); return; }
 

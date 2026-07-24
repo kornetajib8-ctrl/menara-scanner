@@ -664,7 +664,7 @@
       <div id="view-dashboard"
         class="admin-view active p-4 sm:p-6 md:p-8 pb-28 max-w-container-max mx-auto w-full flex-1">
         <!-- KPI Cards -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div
             class="bg-white p-5 rounded-xl shadow-soft border border-border-subtle hover:border-primary/30 transition-all">
             <div class="flex justify-between items-start mb-3">
@@ -715,6 +715,22 @@
             <div class="flex items-baseline gap-2 mt-1">
               <span class="text-[28px] font-extrabold text-on-surface tabular-nums" id="kpi-shipped">—</span>
               <span class="text-[11px] text-on-surface-variant">terkirim</span>
+            </div>
+          </div>
+          <div
+            class="bg-white p-5 rounded-xl shadow-soft border border-border-subtle hover:border-status-error/30 transition-all">
+            <div class="flex justify-between items-start mb-3">
+              <div class="bg-status-error/10 p-2.5 rounded-lg"><span
+                  class="material-symbols-outlined text-status-error text-[22px]">assignment_return</span></div>
+              <div class="flex items-center gap-1.5 bg-status-error/10 px-2 py-1 rounded text-status-error">
+                <span class="material-symbols-outlined text-[14px]">warning</span>
+                <span class="text-[12px] font-bold">Needs Attention</span>
+              </div>
+            </div>
+            <p class="text-on-surface-variant text-[12px] font-semibold uppercase tracking-wider">Retur (Inbound)</p>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-[28px] font-extrabold text-on-surface tabular-nums" id="kpi-retur">—</span>
+              <span class="text-[11px] text-on-surface-variant">dikembalikan</span>
             </div>
           </div>
         </section>
@@ -1690,10 +1706,11 @@
         .then(function (stats) {
           if (stats.error) { showToast('Error: ' + stats.error, 'error'); return; }
 
-          // KPI Cards
+          // Update KPIs
           document.getElementById('kpi-total').textContent = formatNumber(stats.totalPaket);
           document.getElementById('kpi-pending').textContent = formatNumber(stats.perluDikirim);
           document.getElementById('kpi-shipped').textContent = formatNumber(stats.sedangDikirim);
+          document.getElementById('kpi-retur').textContent = formatNumber(stats.retur);
 
           // Bar Chart
           renderChart(stats.ekspedisiStats);
@@ -1723,7 +1740,13 @@
         const name = entry[0];
         const data = entry[1];
         const pct = maxTotal > 0 ? Math.round((data.total / maxTotal) * 100) : 0;
-        const shortName = name.replace('Shopee Xpress', 'SPX').replace('J&T Express', 'J&T').replace('SiCepat', 'SICEPAT').replace('Anteraja', 'ANTERAJA');
+        
+        // Extract simple name if it's too long (e.g. REGULER (CASHLESS)-ANTERAJA REGULER -> ANTERAJA REGULER)
+        let shortName = name;
+        if (name.includes('-')) {
+          shortName = name.split('-').pop().trim();
+        }
+        shortName = shortName.replace('Shopee Xpress', 'SPX').replace('J&T Express', 'J&T').replace('SiCepat', 'SICEPAT').replace('Anteraja', 'ANTERAJA');
 
         return '<div class="flex-1 flex flex-col items-center group">' +
           '<div class="w-10 md:w-12 bg-surface-variant rounded-t-lg relative flex flex-col justify-end overflow-hidden h-full">' +
@@ -1731,7 +1754,7 @@
           '<div class="absolute -top-7 left-0 right-0 text-center text-primary font-bold text-[12px] opacity-0 group-hover:opacity-100 transition-opacity">' + data.total + '</div>' +
           '</div>' +
           '</div>' +
-          '<span class="mt-3 text-[10px] md:text-[11px] font-bold text-on-surface-variant uppercase tracking-widest text-center">' + shortName + '</span>' +
+          '<span class="mt-3 text-[9px] md:text-[10px] leading-tight line-clamp-2 px-1 font-bold text-on-surface-variant uppercase tracking-widest text-center break-words w-full" title="' + name + '">' + shortName + '</span>' +
           '</div>';
       }).join('');
 
